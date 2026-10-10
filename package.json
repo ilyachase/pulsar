@@ -1,0 +1,27 @@
+{
+  "name": "pulsar",
+  "description": "Индикатор непрочитанных писем Gmail и Яндекс Почты",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "compile": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@types/node": "^24.19.2",
+    "typescript": "~5.9",
+    "vitest": "^5.0.3",
+    "wxt": "^0.21.4"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.11.2"
+  }
+}

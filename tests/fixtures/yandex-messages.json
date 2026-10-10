@@ -1,0 +1,39 @@
+{
+  "models": [
+    {
+      "name": "messages",
+      "status": "ok",
+      "data": {
+        "message": [
+          {
+            "mid": "194499208907126502",
+            "tid": "t194499208907126502",
+            "fid": "1",
+            "new": 1,
+            "subject": "Выписка за сентябрь",
+            "firstline": "Во вложении выписка по счёту",
+            "date": { "iso": "2026-10-10T09:12:00", "timestamp": 1791623520000 },
+            "field": [
+              { "type": "from", "name": "Банк", "email": "bank@example.com" },
+              { "type": "to", "name": "Test", "email": "test@yandex.ru" }
+            ]
+          },
+          {
+            "mid": "194499208907126503",
+            "new": 0,
+            "subject": "Уже прочитано",
+            "firstline": "",
+            "date": { "timestamp": 1791620000000 },
+            "field": [{ "type": "from", "name": "", "email": "old@example.com" }]
+          }
+        ]
+      }
+    },
+    {
+      "name": "app-badge-counter",
+      "status": "ok",
+      "data": { "counters": { "fresh": 0, "unread": 4 } }
+    }
+  ],
+  "uid": "100500"
+}
