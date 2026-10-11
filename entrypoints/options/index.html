@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ru" class="wa-theme-default wa-palette-default wa-brand-indigo">
+<html class="wa-theme-default wa-palette-default wa-brand-indigo">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pulsar — настройки</title>
+    <title data-i18n="options.title">Pulsar</title>
     <meta name="manifest.open_in_tab" content="true" />
     <link rel="stylesheet" href="./style.css" />
   </head>
@@ -22,32 +22,32 @@
           <circle cx="16" cy="16" r="4" fill="#fff" />
         </svg>
         <div>
-          <h1>Настройки</h1>
-          <p class="sub">Pulsar — пульс вашей почты</p>
+          <h1 data-i18n="options.heading"></h1>
+          <p class="sub" data-i18n="options.tagline"></p>
         </div>
       </header>
 
       <wa-card>
         <div class="row">
-          <span class="name">Тема</span>
-          <wa-radio-group id="theme" label="Тема" orientation="horizontal" size="s"></wa-radio-group>
+          <span class="name" data-i18n="options.theme"></span>
+          <wa-radio-group id="theme" data-i18n-label="options.theme" orientation="horizontal" size="s"></wa-radio-group>
         </div>
         <wa-divider></wa-divider>
         <div class="row">
           <div class="label">
-            <label class="name" for="poll">Проверять почту каждые</label>
+            <label class="name" for="poll" data-i18n="options.poll"></label>
             <span id="poll-hint" class="desc"></span>
             <span id="poll-error" class="desc error" aria-live="polite">
               <wa-icon name="circle-alert"></wa-icon><span id="poll-error-text"></span>
             </span>
           </div>
           <wa-number-input id="poll" required step="1" without-steppers size="s">
-            <span slot="end" class="unit">сек</span>
+            <span slot="end" class="unit" data-i18n="options.pollUnit"></span>
           </wa-number-input>
         </div>
         <wa-divider></wa-divider>
         <div class="row">
-          <label class="name" for="notify">Уведомлять о новых письмах</label>
+          <label class="name" for="notify" data-i18n="options.notify"></label>
           <wa-switch id="notify"></wa-switch>
         </div>
         <wa-divider></wa-divider>
@@ -57,9 +57,9 @@
             <span id="workmail-hint" class="desc"></span>
           </div>
           <div class="workmail-controls">
-            <wa-input id="workmail-url" type="url" size="s" placeholder="Ссылка на вашу почту WorkMail"></wa-input>
-            <wa-button id="workmail-connect" size="s" variant="brand">Подключить</wa-button>
-            <wa-button id="workmail-disconnect" size="s" appearance="outlined" hidden>Отключить</wa-button>
+            <wa-input id="workmail-url" type="url" size="s" data-i18n-placeholder="options.workmailPlaceholder"></wa-input>
+            <wa-button id="workmail-connect" size="s" variant="brand" data-i18n="options.connect"></wa-button>
+            <wa-button id="workmail-disconnect" size="s" appearance="outlined" hidden data-i18n="options.disconnect"></wa-button>
           </div>
         </div>
       </wa-card>

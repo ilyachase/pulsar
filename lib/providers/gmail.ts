@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { i18n } from '../i18n';
 import { type Account, failed, MAX_MESSAGES, type Message, signedOut } from './types';
 
 /**
@@ -47,7 +48,7 @@ export function parseGmailFeed(xml: string, index: number): Account | null {
       id: text(e.id) || href,
       from: text(e.author?.name) || text(e.author?.email),
       fromEmail: text(e.author?.email),
-      subject: text(e.title) || '(без темы)',
+      subject: text(e.title) || i18n.t('noSubject'),
       snippet: text(e.summary),
       date: Date.parse(text(e.issued) || text(e.modified)) || 0,
       url: href || inboxUrl(index),

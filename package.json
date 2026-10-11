@@ -17,6 +17,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@types/node": "^24.19.2",
+    "@wxt-dev/i18n": "^0.2.8",
     "typescript": "~5.9",
     "vitest": "^5.0.3",
     "wxt": "^0.21.4"

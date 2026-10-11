@@ -1,3 +1,4 @@
+import { i18n } from '../i18n';
 import { type Account, failed, MAX_MESSAGES, type Message, signedOut } from './types';
 
 /**
@@ -83,7 +84,7 @@ export function toMessages(items: MailItem[], inboxUrl: string): Message[] {
         id: i.entryid as string,
         from: p.sender_name || p.sent_representing_name || p.sender_smtp_address || '',
         fromEmail: p.sender_smtp_address || p.sender_email_address || '',
-        subject: p.subject?.trim() || '(без темы)',
+        subject: p.subject?.trim() || i18n.t('noSubject'),
         snippet: '',
         date: (p.message_delivery_time ?? 0) * 1000,
         url: inboxUrl,
@@ -143,7 +144,7 @@ export async function fetchWorkmailAccounts(
     );
     const store = hierarchy?.hierarchymodule?.hierarchymodule1?.list?.item?.[0];
     const inboxId: string | undefined = store?.props?.default_folder_inbox;
-    if (!store || !inboxId) throw new Error('нет папки «Входящие»');
+    if (!store || !inboxId) throw new Error(i18n.t('workmail.noInbox'));
     const inbox = store.folders?.item?.find((f: { entryid?: string }) => f.entryid === inboxId);
 
     const list = await post(

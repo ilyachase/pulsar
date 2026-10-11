@@ -8,6 +8,7 @@ import '@awesome.me/webawesome/dist/components/switch/switch.js';
 import '@awesome.me/webawesome/dist/components/divider/divider.js';
 import '@awesome.me/webawesome/dist/components/input/input.js';
 import '@awesome.me/webawesome/dist/components/button/button.js';
+import { i18n, localizePage } from '@/lib/i18n';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import {
   clampPollSeconds,
@@ -28,6 +29,7 @@ import {
 } from '@/lib/ui/theme';
 
 initTheme();
+localizePage();
 
 // Theme: a radio group rendered as icon buttons (the selected one is highlighted, names in tooltips)
 const themeGroup = document.getElementById('theme') as HTMLElement & { value: string };
@@ -62,9 +64,9 @@ const pollValue = () => String(poll.value ?? '');
 function renderPollTexts(): void {
   const error = pollError(pollValue());
   pollErrorText.textContent = error ?? '';
-  // Only when the seconds aren't self-explanatory: 900 → "= 15 минут", 30 → nothing
+  // Only when the seconds aren't self-explanatory: 900 → "= 15 minutes", 30 → nothing
   const human = error ? null : formatDuration(Number(pollValue()));
-  pollHint.textContent = error ? 'От 30 секунд до суток' : human ? `= ${human}` : '';
+  pollHint.textContent = error ? i18n.t('options.pollRange') : human ? `= ${human}` : '';
 }
 
 void pollSecondsItem.getValue().then((stored) => {
@@ -117,13 +119,13 @@ void workmailUrlItem.getValue().then((url) => renderWorkmail(url));
 workmailConnect.addEventListener('click', async () => {
   const url = parseWorkmailUrl(workmailInput.value);
   if (!url) {
-    renderWorkmail(null, 'Нужна ссылка вида https://webmail.mail.<регион>.awsapps.com/workmail/');
+    renderWorkmail(null, i18n.t('options.workmailBadUrl'));
     return;
   }
   // Must run inside the click (user gesture) for Chrome to show its permission prompt
   const granted = await browser.permissions.request({ origins: [`${url.origin}/*`] });
   if (!granted) {
-    renderWorkmail(null, 'Chrome не выдал доступ к адресу почты');
+    renderWorkmail(null, i18n.t('options.workmailDenied'));
     return;
   }
   await workmailUrlItem.setValue(url.toString());

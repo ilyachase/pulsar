@@ -1,3 +1,5 @@
+import { i18n } from '@/lib/i18n';
+
 export type ThemeMode = 'auto' | 'light' | 'dark';
 
 /**
@@ -9,9 +11,9 @@ const KEY = 'pulsar:theme';
 export const THEME_MODES: ThemeMode[] = ['auto', 'light', 'dark'];
 
 export const THEME_LABEL: Record<ThemeMode, string> = {
-  auto: 'Как в системе',
-  light: 'Светлая',
-  dark: 'Тёмная',
+  auto: i18n.t('options.themeAuto'),
+  light: i18n.t('options.themeLight'),
+  dark: i18n.t('options.themeDark'),
 };
 
 export const THEME_ICON: Record<ThemeMode, string> = {

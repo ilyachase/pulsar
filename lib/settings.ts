@@ -1,3 +1,5 @@
+import { i18n, locale } from './i18n';
+
 /** Chrome doesn't fire alarms more often than every 30 seconds */
 export const MIN_POLL_SECONDS = 30;
 export const MAX_POLL_SECONDS = 24 * 60 * 60;
@@ -11,7 +13,7 @@ export function clampPollSeconds(value: unknown): number {
   return Math.min(MAX_POLL_SECONDS, Math.max(MIN_POLL_SECONDS, n));
 }
 
-const duration = new Intl.DurationFormat('ru-RU', { style: 'long' });
+const duration = new Intl.DurationFormat(locale, { style: 'long' });
 
 /**
  * A human duration for a number of seconds, only when it says more than the seconds themselves:
@@ -33,9 +35,10 @@ export function formatDuration(seconds: number): string | null {
 export function pollError(raw: string): string | null {
   const text = raw.trim();
   const n = Number(text);
-  if (text === '' || !Number.isFinite(n)) return 'Укажите число секунд';
-  if (!Number.isInteger(n)) return 'Только целое число секунд';
-  if (n < MIN_POLL_SECONDS) return 'Минимум 30 секунд';
-  if (n > MAX_POLL_SECONDS) return 'Максимум 86 400 секунд';
+  const count = (v: number): [string] => [new Intl.NumberFormat(locale).format(v)];
+  if (text === '' || !Number.isFinite(n)) return i18n.t('options.pollRequired');
+  if (!Number.isInteger(n)) return i18n.t('options.pollInteger');
+  if (n < MIN_POLL_SECONDS) return i18n.t('options.pollMin', count(MIN_POLL_SECONDS));
+  if (n > MAX_POLL_SECONDS) return i18n.t('options.pollMax', count(MAX_POLL_SECONDS));
   return null;
 }

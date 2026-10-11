@@ -1,0 +1,75 @@
+locale: ru
+extName: Pulsar
+extDescription: Пульс вашей почты
+
+unread:
+  count:
+    one: $1 новое
+    few: $1 новых
+    many: $1 новых
+    other: $1 новых
+  noun:
+    one: письмо
+    few: письма
+    many: писем
+    # "other" in Russian is fractions: 1,5 письма
+    other: письма
+
+noSubject: (без темы)
+
+popup:
+  settings: Настройки
+  refresh: Проверить сейчас
+  checking: Проверяю почту…
+  noNew: Новых писем нет
+  openInbox: Открыть ящик
+  signIn: Войти
+  retry: Повторить
+  notSignedIn: Не выполнен вход
+  checkFailed: "Не удалось проверить: $1"
+  unknownError: неизвестная ошибка
+
+badge:
+  noNew: новых писем нет
+  allFailed: не удалось проверить почту
+  allSignedOut: не выполнен вход
+  failedIn:
+    one: ошибка в $1 ящике
+    few: ошибка в $1 ящиках
+    many: ошибка в $1 ящиках
+    other: ошибка в $1 ящиках
+  signedOutIn:
+    one: вход не выполнен в $1 ящике
+    few: вход не выполнен в $1 ящиках
+    many: вход не выполнен в $1 ящиках
+    other: вход не выполнен в $1 ящиках
+
+options:
+  title: Pulsar — настройки
+  heading: Настройки
+  tagline: Pulsar — пульс вашей почты
+  theme: Тема
+  themeAuto: Как в системе
+  themeLight: Светлая
+  themeDark: Тёмная
+  poll: Проверять почту каждые
+  pollUnit: сек
+  pollRange: От 30 секунд до суток
+  pollRequired: Укажите число секунд
+  pollInteger: Только целое число секунд
+  pollMin: Минимум $1 секунд
+  pollMax: Максимум $1 секунд
+  notify: Уведомлять о новых письмах
+  workmailPlaceholder: Ссылка на вашу почту WorkMail
+  connect: Подключить
+  disconnect: Отключить
+  workmailBadUrl: "Нужна ссылка вида https://webmail.mail.<регион>.awsapps.com/workmail/"
+  workmailDenied: Chrome не выдал доступ к адресу почты
+
+yandex:
+  name: Яндекс Почта
+  error: "Яндекс: $1"
+  mailboxNotFound: ящик не найден
+
+workmail:
+  noInbox: нет папки «Входящие»

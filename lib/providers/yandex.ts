@@ -1,3 +1,4 @@
+import { i18n } from '../i18n';
 import { type Account, failed, MAX_MESSAGES, type Message, signedOut } from './types';
 
 /**
@@ -42,7 +43,7 @@ export function parseYandexPage(html: string): YandexSession | null {
   const ckey = html.match(/"ckey":"([^"]+)"/)?.[1];
   const uid = html.match(/"uid":"(\d+)"/)?.[1];
   if (!ckey || !uid) return null;
-  const email = html.match(/"default_email":"([^"]+)"/)?.[1] ?? 'Яндекс Почта';
+  const email = html.match(/"default_email":"([^"]+)"/)?.[1] ?? i18n.t('yandex.name');
   return { ckey: JSON.parse(`"${ckey}"`) as string, uid, email };
 }
 
@@ -71,7 +72,7 @@ export interface YandexResponse {
 
 export class YandexModelError extends Error {
   constructor(readonly code: string) {
-    super(`Яндекс: ${code}`);
+    super(i18n.t('yandex.error', [code]));
   }
 }
 
@@ -97,7 +98,7 @@ export function parseYandexMessages(
       id: m.mid as string,
       from: from?.name || from?.email || '',
       fromEmail: from?.email ?? '',
-      subject: m.subject?.trim() || '(без темы)',
+      subject: m.subject?.trim() || i18n.t('noSubject'),
       snippet: m.firstline?.trim() ?? '',
       date: ts,
       url: messageUrl(host, session.uid, m.mid as string),
@@ -154,7 +155,7 @@ export async function listPassportAccounts(
   }>) {
     if (typeof a?.uid !== 'string' && typeof a?.uid !== 'number') continue;
     const email = typeof a.defaultEmail === 'string' ? a.defaultEmail : String(a.login ?? '');
-    accounts.push({ uid: String(a.uid), email: email || 'Яндекс Почта' });
+    accounts.push({ uid: String(a.uid), email: email || i18n.t('yandex.name') });
   }
   const def = String(json.default_uid ?? '');
   return accounts.sort((x, y) => Number(y.uid === def) - Number(x.uid === def));
@@ -265,7 +266,7 @@ async function fetchByUid(account: PassportAccount, fetchFn: typeof fetch): Prom
     };
   }
   hostByUid.delete(account.uid);
-  const err = new Error('ящик не найден');
+  const err = new Error(i18n.t('yandex.mailboxNotFound'));
   return {
     ...failed('yandex', account.email, inboxFor(account.uid), err),
     id: `yandex:${account.uid}`,
@@ -288,14 +289,15 @@ async function fetchDefaultOnly(fetchFn: typeof fetch): Promise<Account[]> {
       lastError = err;
     }
   }
-  if (lastError) return [failed('yandex', 'Яндекс Почта', 'https://mail.yandex.ru/', lastError)];
-  return [signedOut('yandex', 'Яндекс Почта', LOGIN_URL)];
+  if (lastError)
+    return [failed('yandex', i18n.t('yandex.name'), 'https://mail.yandex.ru/', lastError)];
+  return [signedOut('yandex', i18n.t('yandex.name'), LOGIN_URL)];
 }
 
 export async function fetchYandexAccounts(fetchFn: typeof fetch = fetch): Promise<Account[]> {
   const accounts = await listPassportAccounts(fetchFn);
   if (accounts === null) return fetchDefaultOnly(fetchFn);
-  if (accounts.length === 0) return [signedOut('yandex', 'Яндекс Почта', LOGIN_URL)];
+  if (accounts.length === 0) return [signedOut('yandex', i18n.t('yandex.name'), LOGIN_URL)];
   return Promise.all(accounts.map((a) => fetchByUid(a, fetchFn)));
 }
 

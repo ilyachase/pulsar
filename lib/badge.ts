@@ -1,4 +1,4 @@
-import { plural } from './plural';
+import { i18n, plural, unreadText } from './i18n';
 import type { Account } from './providers/types';
 
 export interface Badge {
@@ -6,8 +6,6 @@ export interface Badge {
   color: string;
   title: string;
 }
-
-const inBoxes = (n: number) => `в ${n} ${plural(n, ['ящике', 'ящиках', 'ящиках'])}`;
 
 /**
  * The toolbar tooltip is a one-line summary: Chrome truncates long or multi-line titles,
@@ -18,15 +16,11 @@ function summary(accounts: Account[], unread: number): string {
   const errors = accounts.filter((a) => a.status === 'error').length;
   const signedOut = accounts.filter((a) => a.status === 'signed-out').length;
 
-  if (ok === 0) return errors ? 'не удалось проверить почту' : 'не выполнен вход';
+  if (ok === 0) return errors ? i18n.t('badge.allFailed') : i18n.t('badge.allSignedOut');
 
-  const parts = [
-    unread > 0
-      ? `${unread} ${plural(unread, ['новое', 'новых', 'новых'])} ${plural(unread, ['письмо', 'письма', 'писем'])}`
-      : 'новых писем нет',
-  ];
-  if (errors) parts.push(`ошибка ${inBoxes(errors)}`);
-  if (signedOut) parts.push(`вход не выполнен ${inBoxes(signedOut)}`);
+  const parts = [unread > 0 ? unreadText(unread) : i18n.t('badge.noNew')];
+  if (errors) parts.push(plural('badge.failedIn', errors));
+  if (signedOut) parts.push(plural('badge.signedOutIn', signedOut));
   return parts.join(' · ');
 }
 

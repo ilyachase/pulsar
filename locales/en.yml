@@ -1,0 +1,68 @@
+# The locale these messages are in: Intl formatting and plural rules follow it
+locale: en
+extName: Pulsar
+extDescription: The pulse of your mail
+
+# Plural messages are keyed by Intl.PluralRules categories (see lib/i18n.ts)
+unread:
+  count:
+    one: $1 new
+    other: $1 new
+  noun:
+    one: message
+    other: messages
+
+noSubject: (no subject)
+
+popup:
+  settings: Settings
+  refresh: Check now
+  checking: Checking mail…
+  noNew: No new mail
+  openInbox: Open inbox
+  signIn: Sign in
+  retry: Retry
+  notSignedIn: Not signed in
+  checkFailed: "Couldn't check: $1"
+  unknownError: unknown error
+
+badge:
+  noNew: no new mail
+  allFailed: couldn't check mail
+  allSignedOut: not signed in
+  failedIn:
+    one: error in $1 mailbox
+    other: errors in $1 mailboxes
+  signedOutIn:
+    one: signed out of $1 mailbox
+    other: signed out of $1 mailboxes
+
+options:
+  title: Pulsar — Settings
+  heading: Settings
+  tagline: Pulsar — the pulse of your mail
+  theme: Theme
+  themeAuto: System
+  themeLight: Light
+  themeDark: Dark
+  poll: Check mail every
+  pollUnit: sec
+  pollRange: From 30 seconds to a day
+  pollRequired: Enter a number of seconds
+  pollInteger: Whole seconds only
+  pollMin: At least $1 seconds
+  pollMax: At most $1 seconds
+  notify: Notify about new mail
+  workmailPlaceholder: Your WorkMail web address
+  connect: Connect
+  disconnect: Disconnect
+  workmailBadUrl: "Enter a link like https://webmail.mail.<region>.awsapps.com/workmail/"
+  workmailDenied: Chrome didn't grant access to the mail address
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: mailbox not found
+
+workmail:
+  noInbox: no Inbox folder

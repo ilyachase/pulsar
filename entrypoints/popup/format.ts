@@ -1,3 +1,5 @@
+import { locale } from '@/lib/i18n';
+
 /** Web Awesome palette hues used for sender avatars */
 const HUES = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'indigo', 'purple', 'pink'];
 
@@ -9,7 +11,7 @@ export function avatarHue(key: string): string {
   return HUES[(h >>> 0) % HUES.length] as string;
 }
 
-const relative = new Intl.RelativeTimeFormat('ru-RU', { numeric: 'auto' });
+const relative = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
 
 /** Today → "12:41", yesterday → "вчера", this year → "8 окт.", otherwise → "08.10.2025" */
 export function formatTime(ts: number, now: Date = new Date()): string {
@@ -17,13 +19,13 @@ export function formatTime(ts: number, now: Date = new Date()): string {
   const d = new Date(ts);
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   if (ts >= startOfToday) {
-    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }
   if (ts >= startOfToday - 86_400_000) return relative.format(-1, 'day'); // «вчера»
   if (d.getFullYear() === now.getFullYear()) {
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
   }
-  return d.toLocaleDateString('ru-RU');
+  return d.toLocaleDateString(locale);
 }
 
 /**
@@ -32,7 +34,7 @@ export function formatTime(ts: number, now: Date = new Date()): string {
  */
 export function cleanSnippet(snippet: string, from: string, subject: string): string {
   let s = snippet.trim();
-  const norm = (t: string) => t.trim().toLocaleLowerCase('ru-RU');
+  const norm = (t: string) => t.trim().toLocaleLowerCase(locale);
   for (let changed = true; changed; ) {
     changed = false;
     for (const prefix of [from, subject]) {

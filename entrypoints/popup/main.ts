@@ -6,13 +6,14 @@ import '@awesome.me/webawesome/dist/components/callout/callout.js';
 import '@awesome.me/webawesome/dist/components/card/card.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/skeleton/skeleton.js';
-import { plural } from '@/lib/plural';
+import { i18n, localizePage, unreadParts } from '@/lib/i18n';
 import type { Account, Message, State } from '@/lib/providers';
 import { STATE_KEY } from '@/lib/state';
 import { initTheme } from '@/lib/ui/theme';
 import { avatarHue, cleanSnippet, formatTime } from './format';
 
 initTheme();
+localizePage();
 
 const list = document.getElementById('list') as HTMLElement;
 const summary = document.getElementById('summary') as HTMLElement;
@@ -85,7 +86,7 @@ function renderHead(a: Account, trailing: HTMLElement[]): HTMLButtonElement {
   const head = el('button', 'head');
   head.type = 'button';
   head.slot = 'header';
-  head.title = a.status === 'signed-out' ? 'Войти' : 'Открыть ящик';
+  head.title = a.status === 'signed-out' ? i18n.t('popup.signIn') : i18n.t('popup.openInbox');
   const who = el('span', 'who');
   who.append(el('span', 'email', a.email));
   head.append(icon(providerIcon(a), { class: 'provider' }), who, ...trailing);
@@ -97,7 +98,7 @@ function renderAccount(a: Account): HTMLElement {
   const empty = a.messages.length === 0 && a.unreadCount === 0;
   // Every account keeps its place; one with nothing unread is a single quiet header row
   const card = wa('wa-card', { 'with-header': true, class: empty ? 'quiet' : '' });
-  const openHint = el('span', 'open', 'Открыть ящик');
+  const openHint = el('span', 'open', i18n.t('popup.openInbox'));
   openHint.append(icon('external'));
   const trailing: HTMLElement[] = [openHint];
   // The count only adds information when there are more unread messages than rows shown
@@ -124,13 +125,15 @@ function renderProblem(a: Account): HTMLElement {
   calloutIcon.slot = 'icon';
   const body = el('div', 'problem-body');
   const action = wa('wa-button', { size: 's', variant: isError ? 'danger' : 'brand' });
-  action.textContent = isError ? 'Повторить' : 'Войти';
+  action.textContent = isError ? i18n.t('popup.retry') : i18n.t('popup.signIn');
   action.addEventListener('click', () => (isError ? void refresh() : open(a.inboxUrl)));
   body.append(
     el(
       'span',
       undefined,
-      isError ? `Не удалось проверить: ${a.error ?? 'неизвестная ошибка'}` : 'Не выполнен вход',
+      isError
+        ? i18n.t('popup.checkFailed', [a.error ?? i18n.t('popup.unknownError')])
+        : i18n.t('popup.notSignedIn'),
     ),
     action,
   );
@@ -149,7 +152,7 @@ function render(state: State | undefined, animate = false): void {
   list.classList.toggle('enter', animate);
   list.replaceChildren();
   if (!state) {
-    summary.textContent = 'Проверяю почту…';
+    summary.textContent = i18n.t('popup.checking');
     for (let i = 0; i < 3; i++) list.append(wa('wa-skeleton', { effect: 'sheen' }));
     return;
   }
@@ -159,12 +162,10 @@ function render(state: State | undefined, animate = false): void {
 
   summary.replaceChildren();
   if (total > 0) {
-    summary.append(
-      el('b', undefined, `${total} ${plural(total, ['новое', 'новых', 'новых'])}`),
-      ` ${plural(total, ['письмо', 'письма', 'писем'])}`,
-    );
+    const [count, noun] = unreadParts(total);
+    summary.append(el('b', undefined, count), ` ${noun}`);
   } else {
-    summary.textContent = 'Новых писем нет';
+    summary.textContent = i18n.t('popup.noNew');
   }
   logo.classList.toggle('live', total > 0);
 

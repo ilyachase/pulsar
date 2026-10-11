@@ -1,4 +1,5 @@
 import { computeBadge } from '@/lib/badge';
+import { unreadText } from '@/lib/i18n';
 import {
   findNewMessages,
   MAX_SEPARATE_NOTIFICATIONS,
@@ -6,7 +7,6 @@ import {
   notificationId,
   parseNotificationId,
 } from '@/lib/notify';
-import { plural } from '@/lib/plural';
 import { fetchAllAccounts, type State } from '@/lib/providers';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import { clampPollSeconds } from '@/lib/settings';
@@ -79,7 +79,7 @@ async function notify(fresh: NewMessage[]): Promise<void> {
     await browser.notifications.create(SUMMARY_NOTIFICATION, {
       type: 'basic',
       iconUrl,
-      title: `${n} ${plural(n, ['новое письмо', 'новых письма', 'новых писем'])}`,
+      title: unreadText(n),
       message: [...new Set(fresh.map((f) => f.message.from || f.message.fromEmail))].join(', '),
     });
     return;
