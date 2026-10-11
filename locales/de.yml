@@ -1,0 +1,66 @@
+locale: de
+extName: Pulsar
+extDescription: Der Puls Ihrer E-Mails
+
+unread:
+  count:
+    one: $1 neue
+    other: $1 neue
+  rest:
+    one: " Nachricht"
+    other: " Nachrichten"
+
+noSubject: (kein Betreff)
+
+popup:
+  settings: Einstellungen
+  refresh: Jetzt prüfen
+  checking: E-Mails werden geprüft…
+  noNew: Keine neuen E-Mails
+  openInbox: Posteingang öffnen
+  signIn: Anmelden
+  retry: Erneut versuchen
+  notSignedIn: Nicht angemeldet
+  checkFailed: "Prüfung fehlgeschlagen: $1"
+  unknownError: unbekannter Fehler
+
+badge:
+  noNew: keine neuen E-Mails
+  allFailed: E-Mails konnten nicht geprüft werden
+  allSignedOut: nicht angemeldet
+  failedIn:
+    one: Fehler in $1 Postfach
+    other: Fehler in $1 Postfächern
+  signedOutIn:
+    one: nicht angemeldet in $1 Postfach
+    other: nicht angemeldet in $1 Postfächern
+
+options:
+  title: Pulsar — Einstellungen
+  heading: Einstellungen
+  tagline: Pulsar — der Puls Ihrer E-Mails
+  theme: Design
+  themeAuto: Wie im System
+  themeLight: Hell
+  themeDark: Dunkel
+  poll: E-Mails prüfen alle
+  pollUnit: Sek.
+  pollRange: Von 30 Sekunden bis zu einem Tag
+  pollRequired: Geben Sie eine Anzahl Sekunden ein
+  pollInteger: Nur ganze Sekunden
+  pollMin: Mindestens $1 Sekunden
+  pollMax: Höchstens $1 Sekunden
+  notify: Über neue E-Mails benachrichtigen
+  workmailPlaceholder: Webadresse Ihres WorkMail
+  connect: Verbinden
+  disconnect: Trennen
+  workmailBadUrl: "Benötigt wird ein Link wie https://webmail.mail.<Region>.awsapps.com/workmail/"
+  workmailDenied: Chrome hat keinen Zugriff auf die E-Mail-Website gewährt
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: Postfach nicht gefunden
+
+workmail:
+  noInbox: Ordner „Posteingang“ fehlt

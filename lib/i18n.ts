@@ -12,21 +12,21 @@ const rules = new Intl.PluralRules(locale);
 
 /**
  * A plural message: its forms are keyed by Intl.PluralRules (Unicode CLDR) categories,
- * e.g. ru unread.noun.{one,few,many,other}, en unread.noun.{one,other}. $1 is the count.
+ * e.g. ru unread.rest.{one,few,many,other}, en unread.rest.{one,other}. $1 is the count.
  */
 export function plural(key: string, n: number): string {
   const t = i18n.t as (key: string, substitutions?: string[]) => string;
   return t(`${key}.${rules.select(n)}`, [new Intl.NumberFormat(locale).format(n)]);
 }
 
-/** "5 новых" + "писем": the popup sets the count apart */
+/** "5 новых" + " писем": the popup sets the count apart */
 export const unreadParts = (n: number): [string, string] => [
   plural('unread.count', n),
-  plural('unread.noun', n),
+  plural('unread.rest', n),
 ];
 
 /** "5 новых писем" */
-export const unreadText = (n: number): string => unreadParts(n).join(' ');
+export const unreadText = (n: number): string => unreadParts(n).join('');
 
 /**
  * Static page text: data-i18n sets the text, data-i18n-{title,label,placeholder} the attribute.

@@ -1,0 +1,70 @@
+locale: fr
+extName: Pulsar
+extDescription: Le pouls de vos e-mails
+
+unread:
+  count:
+    one: $1 nouveau
+    many: $1 nouveaux
+    other: $1 nouveaux
+  rest:
+    one: " message"
+    many: " messages"
+    other: " messages"
+
+noSubject: (sans objet)
+
+popup:
+  settings: Paramètres
+  refresh: Vérifier maintenant
+  checking: Vérification des e-mails…
+  noNew: Aucun nouvel e-mail
+  openInbox: Ouvrir la boîte
+  signIn: Se connecter
+  retry: Réessayer
+  notSignedIn: Non connecté
+  checkFailed: "Échec de la vérification : $1"
+  unknownError: erreur inconnue
+
+badge:
+  noNew: aucun nouvel e-mail
+  allFailed: impossible de vérifier les e-mails
+  allSignedOut: non connecté
+  failedIn:
+    one: erreur dans $1 boîte
+    many: erreurs dans $1 boîtes
+    other: erreurs dans $1 boîtes
+  signedOutIn:
+    one: non connecté à $1 boîte
+    many: non connecté à $1 boîtes
+    other: non connecté à $1 boîtes
+
+options:
+  title: Pulsar — Paramètres
+  heading: Paramètres
+  tagline: Pulsar — le pouls de vos e-mails
+  theme: Thème
+  themeAuto: Comme le système
+  themeLight: Clair
+  themeDark: Sombre
+  poll: Vérifier les e-mails toutes les
+  pollUnit: s
+  pollRange: De 30 secondes à un jour
+  pollRequired: Indiquez un nombre de secondes
+  pollInteger: Secondes entières uniquement
+  pollMin: Minimum $1 secondes
+  pollMax: Maximum $1 secondes
+  notify: Notifier les nouveaux e-mails
+  workmailPlaceholder: Adresse web de votre WorkMail
+  connect: Connecter
+  disconnect: Déconnecter
+  workmailBadUrl: "Il faut un lien du type https://webmail.mail.<région>.awsapps.com/workmail/"
+  workmailDenied: Chrome n’a pas accordé l’accès au site de la messagerie
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex : $1"
+  mailboxNotFound: boîte introuvable
+
+workmail:
+  noInbox: dossier Boîte de réception introuvable

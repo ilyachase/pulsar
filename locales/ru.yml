@@ -8,12 +8,12 @@ unread:
     few: $1 новых
     many: $1 новых
     other: $1 новых
-  noun:
-    one: письмо
-    few: письма
-    many: писем
+  rest:
+    one: " письмо"
+    few: " письма"
+    many: " писем"
     # "other" in Russian is fractions: 1,5 письма
-    other: письма
+    other: " письма"
 
 noSubject: (без темы)
 

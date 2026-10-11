@@ -162,8 +162,8 @@ function render(state: State | undefined, animate = false): void {
 
   summary.replaceChildren();
   if (total > 0) {
-    const [count, noun] = unreadParts(total);
-    summary.append(el('b', undefined, count), ` ${noun}`);
+    const [count, rest] = unreadParts(total);
+    summary.append(el('b', undefined, count), rest);
   } else {
     summary.textContent = i18n.t('popup.noNew');
   }

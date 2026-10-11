@@ -1,0 +1,66 @@
+locale: tr
+extName: Pulsar
+extDescription: E-postanızın nabzı
+
+unread:
+  count:
+    one: $1 yeni
+    other: $1 yeni
+  rest:
+    one: " ileti"
+    other: " ileti"
+
+noSubject: (konu yok)
+
+popup:
+  settings: Ayarlar
+  refresh: Şimdi kontrol et
+  checking: E-postalar kontrol ediliyor…
+  noNew: Yeni e-posta yok
+  openInbox: Gelen kutusunu aç
+  signIn: Oturum aç
+  retry: Tekrar dene
+  notSignedIn: Oturum açılmadı
+  checkFailed: "Kontrol edilemedi: $1"
+  unknownError: bilinmeyen hata
+
+badge:
+  noNew: yeni e-posta yok
+  allFailed: e-postalar kontrol edilemedi
+  allSignedOut: oturum açılmadı
+  failedIn:
+    one: $1 posta kutusunda hata
+    other: $1 posta kutusunda hata
+  signedOutIn:
+    one: $1 posta kutusunda oturum açılmadı
+    other: $1 posta kutusunda oturum açılmadı
+
+options:
+  title: Pulsar — Ayarlar
+  heading: Ayarlar
+  tagline: Pulsar — e-postanızın nabzı
+  theme: Tema
+  themeAuto: Sistemle aynı
+  themeLight: Açık
+  themeDark: Koyu
+  poll: E-posta kontrol aralığı
+  pollUnit: sn
+  pollRange: 30 saniyeden 1 güne kadar
+  pollRequired: Saniye sayısını girin
+  pollInteger: Yalnızca tam sayı saniye
+  pollMin: En az $1 saniye
+  pollMax: En fazla $1 saniye
+  notify: Yeni e-postaları bildir
+  workmailPlaceholder: WorkMail web adresiniz
+  connect: Bağlan
+  disconnect: Bağlantıyı kes
+  workmailBadUrl: "https://webmail.mail.<bölge>.awsapps.com/workmail/ biçiminde bir bağlantı girin"
+  workmailDenied: Chrome posta sitesine erişim izni vermedi
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: posta kutusu bulunamadı
+
+workmail:
+  noInbox: Gelen Kutusu klasörü yok

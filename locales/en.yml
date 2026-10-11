@@ -4,13 +4,14 @@ extName: Pulsar
 extDescription: The pulse of your mail
 
 # Plural messages are keyed by Intl.PluralRules categories (see lib/i18n.ts)
+# "5 new messages" = count (bold in the popup) + rest; rest carries its own leading space, if any
 unread:
   count:
     one: $1 new
     other: $1 new
-  noun:
-    one: message
-    other: messages
+  rest:
+    one: " message"
+    other: " messages"
 
 noSubject: (no subject)
 

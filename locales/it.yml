@@ -1,0 +1,70 @@
+locale: it
+extName: Pulsar
+extDescription: Il battito della tua posta
+
+unread:
+  count:
+    one: $1 nuovo
+    many: $1 nuovi
+    other: $1 nuovi
+  rest:
+    one: " messaggio"
+    many: " messaggi"
+    other: " messaggi"
+
+noSubject: (nessun oggetto)
+
+popup:
+  settings: Impostazioni
+  refresh: Controlla ora
+  checking: Controllo della posta…
+  noNew: Nessuna nuova email
+  openInbox: Apri casella
+  signIn: Accedi
+  retry: Riprova
+  notSignedIn: Accesso non effettuato
+  checkFailed: "Impossibile controllare: $1"
+  unknownError: errore sconosciuto
+
+badge:
+  noNew: nessuna nuova email
+  allFailed: impossibile controllare la posta
+  allSignedOut: accesso non effettuato
+  failedIn:
+    one: errore in $1 casella
+    many: errori in $1 caselle
+    other: errori in $1 caselle
+  signedOutIn:
+    one: accesso non effettuato in $1 casella
+    many: accesso non effettuato in $1 caselle
+    other: accesso non effettuato in $1 caselle
+
+options:
+  title: Pulsar — Impostazioni
+  heading: Impostazioni
+  tagline: Pulsar — il battito della tua posta
+  theme: Tema
+  themeAuto: Come il sistema
+  themeLight: Chiaro
+  themeDark: Scuro
+  poll: Controlla la posta ogni
+  pollUnit: s
+  pollRange: Da 30 secondi a un giorno
+  pollRequired: Inserisci un numero di secondi
+  pollInteger: Solo secondi interi
+  pollMin: Minimo $1 secondi
+  pollMax: Massimo $1 secondi
+  notify: Notifica le nuove email
+  workmailPlaceholder: Indirizzo web del tuo WorkMail
+  connect: Collega
+  disconnect: Scollega
+  workmailBadUrl: "Serve un link come https://webmail.mail.<regione>.awsapps.com/workmail/"
+  workmailDenied: Chrome non ha concesso l'accesso al sito della posta
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: casella non trovata
+
+workmail:
+  noInbox: cartella Posta in arrivo non trovata

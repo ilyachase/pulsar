@@ -1,0 +1,62 @@
+locale: ja
+extName: Pulsar
+extDescription: メールの鼓動
+
+unread:
+  count:
+    other: $1件の新着
+  rest:
+    other: メール
+
+noSubject: (件名なし)
+
+popup:
+  settings: 設定
+  refresh: 今すぐ確認
+  checking: メールを確認しています…
+  noNew: 新着メールはありません
+  openInbox: 受信トレイを開く
+  signIn: ログイン
+  retry: 再試行
+  notSignedIn: ログインしていません
+  checkFailed: "確認できませんでした: $1"
+  unknownError: 不明なエラー
+
+badge:
+  noNew: 新着メールなし
+  allFailed: メールを確認できませんでした
+  allSignedOut: ログインしていません
+  failedIn:
+    other: $1件のメールボックスでエラー
+  signedOutIn:
+    other: $1件のメールボックスで未ログイン
+
+options:
+  title: Pulsar — 設定
+  heading: 設定
+  tagline: Pulsar — メールの鼓動
+  theme: テーマ
+  themeAuto: システムに合わせる
+  themeLight: ライト
+  themeDark: ダーク
+  poll: メールの確認間隔
+  pollUnit: 秒
+  pollRange: 30秒から1日まで
+  pollRequired: 秒数を入力してください
+  pollInteger: 整数の秒数を入力してください
+  pollMin: $1秒以上にしてください
+  pollMax: $1秒以下にしてください
+  notify: 新着メールを通知
+  workmailPlaceholder: WorkMail のウェブアドレス
+  connect: 接続
+  disconnect: 切断
+  workmailBadUrl: "https://webmail.mail.<リージョン>.awsapps.com/workmail/ の形式のリンクを入力してください"
+  workmailDenied: Chrome がメールサイトへのアクセスを許可しませんでした
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: メールボックスが見つかりません
+
+workmail:
+  noInbox: 受信トレイ フォルダがありません

@@ -1,0 +1,70 @@
+locale: es
+extName: Pulsar
+extDescription: El pulso de tu correo
+
+unread:
+  count:
+    one: $1 nuevo
+    many: $1 nuevos
+    other: $1 nuevos
+  rest:
+    one: " mensaje"
+    many: " mensajes"
+    other: " mensajes"
+
+noSubject: (sin asunto)
+
+popup:
+  settings: Configuración
+  refresh: Comprobar ahora
+  checking: Comprobando el correo…
+  noNew: No hay correo nuevo
+  openInbox: Abrir bandeja
+  signIn: Iniciar sesión
+  retry: Reintentar
+  notSignedIn: No has iniciado sesión
+  checkFailed: "No se pudo comprobar: $1"
+  unknownError: error desconocido
+
+badge:
+  noNew: no hay correo nuevo
+  allFailed: no se pudo comprobar el correo
+  allSignedOut: no has iniciado sesión
+  failedIn:
+    one: error en $1 buzón
+    many: errores en $1 buzones
+    other: errores en $1 buzones
+  signedOutIn:
+    one: sin sesión en $1 buzón
+    many: sin sesión en $1 buzones
+    other: sin sesión en $1 buzones
+
+options:
+  title: Pulsar — Configuración
+  heading: Configuración
+  tagline: Pulsar — el pulso de tu correo
+  theme: Tema
+  themeAuto: Como el sistema
+  themeLight: Claro
+  themeDark: Oscuro
+  poll: Comprobar el correo cada
+  pollUnit: s
+  pollRange: De 30 segundos a un día
+  pollRequired: Indica un número de segundos
+  pollInteger: Solo segundos enteros
+  pollMin: Mínimo $1 segundos
+  pollMax: Máximo $1 segundos
+  notify: Avisar de correo nuevo
+  workmailPlaceholder: Dirección web de tu WorkMail
+  connect: Conectar
+  disconnect: Desconectar
+  workmailBadUrl: "Introduce un enlace como https://webmail.mail.<región>.awsapps.com/workmail/"
+  workmailDenied: Chrome no concedió acceso al sitio del correo
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: buzón no encontrado
+
+workmail:
+  noInbox: no hay carpeta Bandeja de entrada

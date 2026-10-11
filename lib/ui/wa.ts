@@ -5,7 +5,16 @@
 import '@awesome.me/webawesome/dist/styles/themes/default.css';
 import '@awesome.me/webawesome/dist/styles/color/variants/brand.css';
 import '@awesome.me/webawesome/dist/styles/utilities.css';
+// Component strings (English is built in); picked by <html lang>, pt-BR falls back to pt
+import '@awesome.me/webawesome/dist/translations/de.js';
+import '@awesome.me/webawesome/dist/translations/es.js';
+import '@awesome.me/webawesome/dist/translations/fr.js';
+import '@awesome.me/webawesome/dist/translations/id.js';
+import '@awesome.me/webawesome/dist/translations/it.js';
+import '@awesome.me/webawesome/dist/translations/ja.js';
+import '@awesome.me/webawesome/dist/translations/pt.js';
 import '@awesome.me/webawesome/dist/translations/ru.js';
+import '@awesome.me/webawesome/dist/translations/tr.js';
 import { registerIconLibrary } from '@awesome.me/webawesome/dist/components/icon/library.js';
 
 const outline = (body: string) =>

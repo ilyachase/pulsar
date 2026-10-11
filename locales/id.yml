@@ -1,0 +1,62 @@
+locale: id
+extName: Pulsar
+extDescription: Denyut email Anda
+
+unread:
+  count:
+    other: $1
+  rest:
+    other: " email baru"
+
+noSubject: (tanpa subjek)
+
+popup:
+  settings: Setelan
+  refresh: Periksa sekarang
+  checking: Memeriksa email…
+  noNew: Tidak ada email baru
+  openInbox: Buka kotak masuk
+  signIn: Login
+  retry: Coba lagi
+  notSignedIn: Belum login
+  checkFailed: "Gagal memeriksa: $1"
+  unknownError: error tidak dikenal
+
+badge:
+  noNew: tidak ada email baru
+  allFailed: gagal memeriksa email
+  allSignedOut: belum login
+  failedIn:
+    other: error di $1 kotak surat
+  signedOutIn:
+    other: belum login di $1 kotak surat
+
+options:
+  title: Pulsar — Setelan
+  heading: Setelan
+  tagline: Pulsar — denyut email Anda
+  theme: Tema
+  themeAuto: Ikuti sistem
+  themeLight: Terang
+  themeDark: Gelap
+  poll: Periksa email setiap
+  pollUnit: dtk
+  pollRange: Dari 30 detik hingga satu hari
+  pollRequired: Masukkan jumlah detik
+  pollInteger: Hanya detik bilangan bulat
+  pollMin: Minimal $1 detik
+  pollMax: Maksimal $1 detik
+  notify: Beri tahu email baru
+  workmailPlaceholder: Alamat web WorkMail Anda
+  connect: Hubungkan
+  disconnect: Putuskan
+  workmailBadUrl: "Masukkan link seperti https://webmail.mail.<region>.awsapps.com/workmail/"
+  workmailDenied: Chrome tidak memberi akses ke situs email
+
+yandex:
+  name: Yandex Mail
+  error: "Yandex: $1"
+  mailboxNotFound: kotak surat tidak ditemukan
+
+workmail:
+  noInbox: folder Kotak Masuk tidak ada
