@@ -16,7 +16,7 @@ import {
 } from '@/lib/settings';
 import { STATE_KEY } from '@/lib/state';
 import { initTheme } from '@/lib/ui/theme';
-import { avatarHue, formatTime } from './format';
+import { avatarHue, cleanSnippet, formatTime } from './format';
 
 initTheme();
 
@@ -24,7 +24,6 @@ let pollText = describeInterval(DEFAULT_SETTINGS.pollSeconds);
 
 const list = document.getElementById('list') as HTMLElement;
 const summary = document.getElementById('summary') as HTMLElement;
-const updated = document.getElementById('updated') as HTMLElement;
 const logo = document.getElementById('logo') as unknown as SVGSVGElement;
 const refreshBtn = document.getElementById('refresh') as HTMLElement;
 const settingsBtn = document.getElementById('settings') as HTMLElement;
@@ -82,7 +81,8 @@ function renderMessage(accountId: string, m: Message): HTMLButtonElement {
   avatar.style.setProperty('--hue', `var(--wa-color-${avatarHue(m.fromEmail || name)}-50)`);
   const line = el('span', 'line');
   line.append(el('span', 'subj', m.subject));
-  if (m.snippet) line.append(` — ${m.snippet}`);
+  const snippet = cleanSnippet(m.snippet, name, m.subject);
+  if (snippet) line.append(` — ${snippet}`);
   row.append(avatar, el('span', 'from', name), line, el('span', 'time', formatTime(m.date)));
   row.addEventListener('click', () => void openMessage(accountId, m));
   return row;
@@ -95,8 +95,6 @@ function renderHead(a: Account, trailing: HTMLElement[]): HTMLButtonElement {
   head.title = a.status === 'signed-out' ? 'Войти' : 'Открыть ящик';
   const who = el('span', 'who');
   who.append(el('span', 'email', a.email));
-  // Signed-out placeholders are already named after the provider
-  if (a.email !== providerName(a)) who.append(el('span', 'kind', providerName(a)));
   head.append(icon(a.provider, { class: 'provider' }), who, ...trailing);
   head.addEventListener('click', () => open(a.inboxUrl));
   return head;
@@ -106,9 +104,14 @@ function renderWithMail(a: Account): HTMLElement {
   const card = wa('wa-card', { 'with-header': true });
   const openHint = el('span', 'open', 'Открыть ящик');
   openHint.append(icon('external'));
-  const count = wa('wa-badge', { variant: 'brand', pill: true });
-  count.textContent = String(a.unreadCount);
-  card.append(renderHead(a, [openHint, count]));
+  const trailing: HTMLElement[] = [openHint];
+  // The count only adds information when there are more unread messages than rows shown
+  if (a.unreadCount > a.messages.length) {
+    const count = wa('wa-badge', { variant: 'brand', pill: true });
+    count.textContent = String(a.unreadCount);
+    trailing.push(count);
+  }
+  card.append(renderHead(a, trailing));
   for (const m of a.messages) card.append(renderMessage(a.id, m));
   return card;
 }
@@ -146,9 +149,9 @@ function renderCaughtUp(accounts: Account[], label: string): HTMLElement {
   if (label) row.append(el('span', 'caught-label', label));
   for (const a of accounts) {
     const chip = wa('wa-button', {
-      size: 's',
+      size: 'xs',
       pill: true,
-      appearance: 'outlined',
+      appearance: 'plain',
       variant: 'neutral',
     });
     chip.title = `${providerName(a)} — открыть ящик`;
@@ -187,23 +190,12 @@ function renderEmpty(accounts: Account[]): HTMLElement {
   return empty;
 }
 
-function renderUpdated(state: State): void {
-  updated.textContent = new Date(state.updatedAt).toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  updated.title = `Последняя проверка · ${pollText}`;
-}
-
 let lastContent = '';
 
 function render(state: State | undefined, animate = false): void {
-  // Same mail as already shown: only the "last checked" time changes, the DOM stays put
+  // Same mail as already shown: keep the DOM as is (silent refresh)
   const content = state ? JSON.stringify(state.accounts) : '';
-  if (state && content === lastContent && !animate) {
-    renderUpdated(state);
-    return;
-  }
+  if (state && content === lastContent && !animate) return;
   lastContent = content;
   list.classList.toggle('enter', animate);
   list.replaceChildren();
@@ -221,16 +213,14 @@ function render(state: State | undefined, animate = false): void {
 
   summary.replaceChildren();
   if (total > 0) {
-    const boxes = state.accounts.length;
     summary.append(
       el('b', undefined, `${total} ${plural(total, ['новое', 'новых', 'новых'])}`),
-      ` ${plural(total, ['письмо', 'письма', 'писем'])} · ${boxes} ${plural(boxes, ['ящик', 'ящика', 'ящиков'])}`,
+      ` ${plural(total, ['письмо', 'письма', 'писем'])}`,
     );
   } else {
     summary.textContent = 'Новых писем нет';
   }
   logo.classList.toggle('live', total > 0);
-  renderUpdated(state);
 
   for (const a of withMail) list.append(renderWithMail(a));
   for (const a of problems) list.append(renderProblem(a));

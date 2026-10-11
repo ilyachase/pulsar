@@ -23,3 +23,23 @@ export function formatTime(ts: number, now: Date = new Date()): string {
   }
   return d.toLocaleDateString('ru-RU');
 }
+
+/**
+ * Mail snippets often start with the sender's name and/or the subject (preheader/header noise):
+ * "Рег.ру Войти Автопродление скоро…" for sender "Рег.ру". Strip those leading repeats.
+ */
+export function cleanSnippet(snippet: string, from: string, subject: string): string {
+  let s = snippet.trim();
+  const norm = (t: string) => t.trim().toLocaleLowerCase('ru-RU');
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const prefix of [from, subject]) {
+      const p = norm(prefix);
+      if (p && norm(s).startsWith(p)) {
+        s = s.slice(prefix.trim().length).replace(/^[\s:—–\-|·•,.]+/, '');
+        changed = true;
+      }
+    }
+  }
+  return s;
+}
