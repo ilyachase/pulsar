@@ -42,19 +42,32 @@ for (const mode of THEME_MODES) {
 themeGroup.setAttribute('value', getThemeMode());
 themeGroup.addEventListener('change', () => setThemeMode(themeGroup.value as ThemeMode));
 
-// Poll interval: a free number of seconds, saved while typing
-const poll = document.getElementById('poll') as HTMLElement & { value: string | number | null };
+// Poll interval: a free number of seconds, saved while typing.
+// The constraints live on the element (required, min, max, step) and the browser checks them.
+const poll = document.getElementById('poll') as HTMLElement & {
+  value: string | number | null;
+  validity: ValidityState;
+  /** Lit: resolves after the component re-rendered and refreshed its validity */
+  updateComplete: Promise<boolean>;
+};
 const pollHint = document.getElementById('poll-hint') as HTMLElement;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
-const pollText = () => String(poll.value ?? '').trim();
+poll.setAttribute('min', String(MIN_POLL_SECONDS));
+poll.setAttribute('max', String(MAX_POLL_SECONDS));
 
 /** null when the field holds something we can't save as is */
 function readPoll(): number | null {
-  const n = Number(pollText());
-  if (pollText() === '' || !Number.isInteger(n)) return null;
-  if (n < MIN_POLL_SECONDS || n > MAX_POLL_SECONDS) return null;
-  return n;
+  return poll.validity.valid ? Number(poll.value) : null;
+}
+
+/** The error text for the constraint that failed */
+function pollError(): string {
+  const v = poll.validity;
+  if (v.valueMissing) return 'Укажите число секунд';
+  if (v.rangeOverflow) return 'Максимум 86 400 секунд';
+  if (v.stepMismatch) return 'Только целое число секунд';
+  return 'Минимум 30 секунд';
 }
 
 /**
@@ -80,13 +93,9 @@ function showPollHint(): void {
     pollHint.textContent = 'От 30 секунд до суток';
     return;
   }
-  const raw = Number(pollText());
   const icon = document.createElement('wa-icon');
   icon.setAttribute('name', 'circle-alert');
-  pollHint.append(
-    icon,
-    Number.isFinite(raw) && raw > MAX_POLL_SECONDS ? 'Максимум 86 400 секунд' : 'Минимум 30 секунд',
-  );
+  pollHint.append(icon, pollError());
 }
 
 void browser.storage.local.get(SETTINGS_KEY).then((stored) => {
@@ -100,23 +109,27 @@ void browser.storage.local.get(SETTINGS_KEY).then((stored) => {
     void browser.storage.local.set({ [SETTINGS_KEY]: settings });
   };
 
-  poll.addEventListener('input', () => {
+  // validity is updated asynchronously by the component, so wait for it before reading
+  poll.addEventListener('input', () => void onInput());
+  async function onInput(): Promise<void> {
+    await poll.updateComplete;
     if (readPoll() !== null) errorShown = false;
     showPollHint();
     clearTimeout(saveTimer);
     const n = readPoll();
     if (n !== null) saveTimer = setTimeout(() => save(n), 400);
-  });
+  }
 
-  const commit = () => {
+  const commit = async () => {
+    await poll.updateComplete;
     const n = readPoll();
     errorShown = n === null;
     showPollHint();
     clearTimeout(saveTimer);
     if (n !== null) save(n);
   };
-  poll.addEventListener('change', commit);
-  poll.addEventListener('blur', commit);
+  poll.addEventListener('change', () => void commit());
+  poll.addEventListener('blur', () => void commit());
 });
 
 (document.getElementById('version') as HTMLElement).textContent =

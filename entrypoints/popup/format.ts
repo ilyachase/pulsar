@@ -9,6 +9,8 @@ export function avatarHue(key: string): string {
   return HUES[(h >>> 0) % HUES.length] as string;
 }
 
+const relative = new Intl.RelativeTimeFormat('ru-RU', { numeric: 'auto' });
+
 /** Today → "12:41", yesterday → "вчера", this year → "8 окт.", otherwise → "08.10.2025" */
 export function formatTime(ts: number, now: Date = new Date()): string {
   if (!ts) return '';
@@ -17,7 +19,7 @@ export function formatTime(ts: number, now: Date = new Date()): string {
   if (ts >= startOfToday) {
     return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
-  if (ts >= startOfToday - 86_400_000) return 'вчера';
+  if (ts >= startOfToday - 86_400_000) return relative.format(-1, 'day'); // «вчера»
   if (d.getFullYear() === now.getFullYear()) {
     return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   }

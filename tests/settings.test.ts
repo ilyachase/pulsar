@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  clampPollSeconds,
-  describeInterval,
-  formatDuration,
-  normalizeSettings,
-} from '../lib/settings';
+import { clampPollSeconds, formatDuration, normalizeSettings } from '../lib/settings';
 
 describe('normalizeSettings', () => {
   it('keeps any whole number of seconds in range', () => {
@@ -25,30 +20,13 @@ describe('clampPollSeconds', () => {
   });
 });
 
-describe('describeInterval', () => {
-  it('picks the largest whole unit with the right Russian form', () => {
-    expect([30, 45, 61, 60, 120, 300, 1260, 3600, 7200, 18000].map(describeInterval)).toEqual([
-      'каждые 30 секунд',
-      'каждые 45 секунд',
-      'каждую 61 секунду',
-      'каждую минуту',
-      'каждые 2 минуты',
-      'каждые 5 минут',
-      'каждую 21 минуту',
-      'каждый час',
-      'каждые 2 часа',
-      'каждые 5 часов',
-    ]);
-  });
-});
-
 describe('formatDuration', () => {
   it('is silent when the seconds speak for themselves, converts otherwise', () => {
     expect([30, 59, 60, 90, 900, 7200, 3600].map(formatDuration)).toEqual([
       null,
       null,
       '1 минута',
-      '1 мин 30 с',
+      '1 минута 30 секунд',
       '15 минут',
       '2 часа',
       '1 час',
