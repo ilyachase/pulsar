@@ -14,12 +14,10 @@ export const THEME_LABEL: Record<ThemeMode, string> = {
   dark: 'Тёмная',
 };
 
-/** Outline icons (stroke = currentColor): monitor, sun, moon */
 export const THEME_ICON: Record<ThemeMode, string> = {
-  auto: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
-  light:
-    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
-  dark: '<path d="M20.5 14.1A8.5 8.5 0 1 1 9.9 3.5a7 7 0 0 0 10.6 10.6z"/>',
+  auto: 'monitor',
+  light: 'sun',
+  dark: 'moon',
 };
 
 const system = window.matchMedia('(prefers-color-scheme: dark)');
@@ -39,10 +37,13 @@ export function setThemeMode(mode: ThemeMode): void {
   applyTheme();
 }
 
+/** Web Awesome switches schemes with the wa-light / wa-dark classes on <html> */
 export function applyTheme(): void {
   const mode = getThemeMode();
   const dark = mode === 'dark' || (mode === 'auto' && system.matches);
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  const root = document.documentElement;
+  root.classList.toggle('wa-dark', dark);
+  root.classList.toggle('wa-light', !dark);
 }
 
 /** Applies the saved theme now and keeps it in sync with the system and other extension pages */

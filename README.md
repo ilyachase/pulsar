@@ -24,13 +24,14 @@ Then go to `chrome://extensions`, turn on Developer mode, click "Load unpacked",
 | `npm run compile` | TypeScript type check |
 | `npm run lint` / `npm run format` | Biome |
 
-Stack: [WXT](https://wxt.dev) (Vite), TypeScript, fast-xml-parser, Vitest, Biome.
+Stack: [WXT](https://wxt.dev) (Vite), TypeScript, [Web Awesome](https://webawesome.com) (UI components and theme; icons are bundled in `lib/ui/wa.ts`, nothing is loaded from a CDN), fast-xml-parser, Vitest, Biome.
 
 ## How it works
 
 ```
-entrypoints/background.ts   alarm every 30 s → adapters → storage.local + badge
+entrypoints/background.ts   alarm (interval from settings, ≥ 30 s) → adapters → storage.local + badge
 entrypoints/popup/          list from storage.local, the ⟳ button triggers a check right away
+entrypoints/options/        settings page: theme, check interval
 lib/providers/gmail.ts      https://mail.google.com/mail/u/N/feed/atom, N = 0, 1, … until an account repeats
 lib/providers/yandex.ts     ckey from the mail.yandex.ru HTML → POST /web-api/models/liza1 (messages, only_new)
 lib/badge.ts                badge text, color, and tooltip

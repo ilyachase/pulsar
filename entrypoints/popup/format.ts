@@ -1,19 +1,12 @@
-const PALETTE = [
-  '#1a73e8',
-  '#188038',
-  '#e37400',
-  '#9334e6',
-  '#d93025',
-  '#007b83',
-  '#c5221f',
-  '#5f6368',
-];
+/** Web Awesome palette hues used for sender avatars */
+const HUES = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'indigo', 'purple', 'pink'];
 
-export function avatarColor(key: string): string {
-  // FNV-1a: spreads well even in the low bits (a plain *31 hash collides modulo 8)
+/** A stable palette hue per sender, e.g. "cyan" */
+export function avatarHue(key: string): string {
+  // FNV-1a: spreads well even in the low bits (a plain *31 hash collides on small moduli)
   let h = 0x811c9dc5;
   for (const ch of key) h = Math.imul(h ^ (ch.codePointAt(0) ?? 0), 0x01000193);
-  return PALETTE[(h >>> 0) % PALETTE.length] as string;
+  return HUES[(h >>> 0) % HUES.length] as string;
 }
 
 /** Today → "12:41", yesterday → "вчера", this year → "8 окт.", otherwise → "08.10.2025" */
