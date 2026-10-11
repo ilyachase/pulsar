@@ -1,18 +1,24 @@
 import { type Account, failed, MAX_MESSAGES, type Message, signedOut } from './types';
 
 /**
- * Yandex Mail: the same internal web API the mail.yandex.ru web interface uses.
- * Verified 2026-10-10 against a live mailbox:
- *  1. GET https://mail.yandex.ru/ → the HTML contains "ckey", "uid" and "default_email".
- *     Signed out, it redirects to 360.yandex.ru / passport.yandex.ru.
- *  2. POST /web-api/models/liza1?_m=messages,app-badge-counter
+ * Yandex Mail: the same internal web API the Yandex Mail web interface uses.
+ * Verified 2026-10-10 against live mailboxes (a personal and a Yandex 360 account in one session):
+ *  1. GET https://api.passport.yandex.ru/accounts → {"accounts":[{"uid","defaultEmail",…}],
+ *     "default_uid"} — every account signed in to the browser session (the account switcher list).
+ *  2. GET https://{host}/?uid={uid} → the HTML contains "ckey", "uid" and "default_email" of that
+ *     account, without switching the session's default account. Personal mailboxes live on
+ *     mail.yandex.ru, Yandex 360 (organization) ones on mail.360.yandex.ru; the wrong host
+ *     redirects to the right one. Signed out, the page redirects to 360.yandex.ru / passport.
+ *  3. POST https://{host}/web-api/models/liza1?_m=messages,app-badge-counter
  *     {"models":[{"name":"messages","params":{"current_folder":"1","extra_cond":"only_new",…}},
  *                {"name":"app-badge-counter","params":{}}],"_ckey":…,"_uid":…}
- *     A stale ckey answers models[i].status = "error", error = "ckey".
- *  3. Open a message: https://mail.yandex.ru/?uid={uid}#/message/{mid}
+ *     The ckey is per account; a stale or foreign one answers status "error", error "ckey".
+ *  4. Open a message: https://{host}/?uid={uid}#/message/{mid}
  */
-const DOMAINS = ['mail.yandex.ru', 'mail.yandex.com'] as const;
-type Domain = (typeof DOMAINS)[number];
+const PASSPORT_ACCOUNTS = 'https://api.passport.yandex.ru/accounts';
+const MAIL_HOSTS = ['mail.yandex.ru', 'mail.360.yandex.ru', 'mail.yandex.com'] as const;
+/** Without the passport list we can only see the session's default account */
+const FALLBACK_HOSTS = ['mail.yandex.ru', 'mail.yandex.com'] as const;
 
 const LOGIN_URL = 'https://passport.yandex.ru/auth?retpath=https%3A%2F%2Fmail.yandex.ru%2F';
 
@@ -22,8 +28,15 @@ export interface YandexSession {
   email: string;
 }
 
-/** Session cache: the page is ~300 KB, so we reload it only when the ckey goes stale */
-const sessions = new Map<Domain, YandexSession>();
+interface PassportAccount {
+  uid: string;
+  email: string;
+}
+
+/** Session cache per host+uid: the page is ~300 KB, so we reload it only when the ckey goes stale */
+const sessions = new Map<string, YandexSession>();
+/** Which mail host serves which uid, so we don't walk through redirects on every poll */
+const hostByUid = new Map<string, string>();
 
 export function parseYandexPage(html: string): YandexSession | null {
   const ckey = html.match(/"ckey":"([^"]+)"/)?.[1];
@@ -62,13 +75,13 @@ export class YandexModelError extends Error {
   }
 }
 
-export function messageUrl(domain: string, uid: string, mid: string): string {
-  return `https://${domain}/?uid=${uid}#/message/${mid}`;
+export function messageUrl(host: string, uid: string, mid: string): string {
+  return `https://${host}/?uid=${uid}#/message/${mid}`;
 }
 
 export function parseYandexMessages(
   json: YandexResponse,
-  domain: string,
+  host: string,
   session: YandexSession,
 ): Account {
   const models = json.models ?? [];
@@ -87,7 +100,7 @@ export function parseYandexMessages(
       subject: m.subject?.trim() || '(без темы)',
       snippet: m.firstline?.trim() ?? '',
       date: ts,
-      url: messageUrl(domain, session.uid, m.mid as string),
+      url: messageUrl(host, session.uid, m.mid as string),
     };
   });
 
@@ -100,72 +113,132 @@ export function parseYandexMessages(
     email: session.email,
     status: 'ok',
     unreadCount: typeof unread === 'number' ? Math.max(unread, messages.length) : messages.length,
-    inboxUrl: `https://${domain}/?uid=${session.uid}#/inbox`,
+    inboxUrl: `https://${host}/?uid=${session.uid}#/inbox`,
     messages,
   };
 }
 
-async function loadSession(domain: Domain, fetchFn: typeof fetch): Promise<YandexSession | null> {
-  const res = await fetchFn(`https://${domain}/`, { credentials: 'include', cache: 'no-store' });
-  // Signed out we land on 360.yandex.ru or passport.yandex.ru
-  if (!res.ok || new URL(res.url).host !== domain) return null;
-  return parseYandexPage(await res.text());
+/**
+ * Accounts signed in to the browser session, default first.
+ * null = the list is unavailable (network error, unexpected format): fall back to the default
+ * account only. [] = signed out.
+ */
+export async function listPassportAccounts(
+  fetchFn: typeof fetch,
+): Promise<PassportAccount[] | null> {
+  let res: Response;
+  try {
+    res = await fetchFn(PASSPORT_ACCOUNTS, {
+      credentials: 'include',
+      cache: 'no-store',
+      redirect: 'manual',
+    });
+  } catch {
+    return null;
+  }
+  if (res.status === 401 || res.status === 403) return [];
+  if (!res.ok) return null;
+  let json: { accounts?: unknown; default_uid?: unknown };
+  try {
+    json = await res.json();
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(json.accounts)) return null;
+
+  const accounts: PassportAccount[] = [];
+  for (const a of json.accounts as Array<{
+    uid?: unknown;
+    defaultEmail?: unknown;
+    login?: unknown;
+  }>) {
+    if (typeof a?.uid !== 'string' && typeof a?.uid !== 'number') continue;
+    const email = typeof a.defaultEmail === 'string' ? a.defaultEmail : String(a.login ?? '');
+    accounts.push({ uid: String(a.uid), email: email || 'Яндекс Почта' });
+  }
+  const def = String(json.default_uid ?? '');
+  return accounts.sort((x, y) => Number(y.uid === def) - Number(x.uid === def));
+}
+
+/**
+ * Loads ckey/uid/email from the mail page. With a uid, the page must belong to that account
+ * (we never switch the session's default account). Signed out or on the wrong host the page
+ * redirects; we stop at the redirect (opaque response) since we have no host permission for
+ * passport/360.yandex.ru and following it would fail with "Failed to fetch".
+ */
+async function loadSession(
+  host: string,
+  uid: string | undefined,
+  fetchFn: typeof fetch,
+): Promise<YandexSession | null> {
+  const res = await fetchFn(`https://${host}/${uid ? `?uid=${uid}` : ''}`, {
+    credentials: 'include',
+    cache: 'no-store',
+    redirect: 'manual',
+  });
+  if (res.type === 'opaqueredirect' || !res.ok) return null;
+  const session = parseYandexPage(await res.text());
+  if (!session || (uid && session.uid !== uid)) return null;
+  return session;
 }
 
 async function requestMessages(
-  domain: Domain,
+  host: string,
   session: YandexSession,
   fetchFn: typeof fetch,
 ): Promise<YandexResponse> {
-  const res = await fetchFn(
-    `https://${domain}/web-api/models/liza1?_m=messages,app-badge-counter`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        models: [
-          {
-            name: 'messages',
-            params: {
-              current_folder: '1',
-              first: 0,
-              last: MAX_MESSAGES,
-              sort_type: 'date',
-              extra_cond: 'only_new',
-            },
+  const res = await fetchFn(`https://${host}/web-api/models/liza1?_m=messages,app-badge-counter`, {
+    method: 'POST',
+    credentials: 'include',
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      models: [
+        {
+          name: 'messages',
+          params: {
+            current_folder: '1',
+            first: 0,
+            last: MAX_MESSAGES,
+            sort_type: 'date',
+            extra_cond: 'only_new',
           },
-          { name: 'app-badge-counter', params: {} },
-        ],
-        _ckey: session.ckey,
-        _uid: session.uid,
-        _locale: 'ru',
-      }),
-    },
-  );
+        },
+        { name: 'app-badge-counter', params: {} },
+      ],
+      _ckey: session.ckey,
+      _uid: session.uid,
+      _locale: 'ru',
+    }),
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as YandexResponse;
 }
 
-async function fetchDomain(domain: Domain, fetchFn: typeof fetch): Promise<Account | null> {
+/** One mailbox on one host; null if the page isn't there (signed out / another host) */
+async function fetchMailbox(
+  host: string,
+  uid: string | undefined,
+  fetchFn: typeof fetch,
+): Promise<Account | null> {
+  const key = `${host}|${uid ?? ''}`;
   for (let attempt = 0; attempt < 2; attempt++) {
-    let session = sessions.get(domain);
+    let session = sessions.get(key);
     if (!session) {
-      const loaded = await loadSession(domain, fetchFn);
+      const loaded = await loadSession(host, uid, fetchFn);
       if (!loaded) {
-        sessions.delete(domain);
+        sessions.delete(key);
         return null;
       }
       session = loaded;
-      sessions.set(domain, session);
+      sessions.set(key, session);
     }
     try {
-      return parseYandexMessages(await requestMessages(domain, session, fetchFn), domain, session);
+      return parseYandexMessages(await requestMessages(host, session, fetchFn), host, session);
     } catch (err) {
       // Stale ckey or expired session: drop the cache and retry once with a fresh page
       if (attempt === 0 && err instanceof YandexModelError) {
-        sessions.delete(domain);
+        sessions.delete(key);
         continue;
       }
       throw err;
@@ -174,11 +247,42 @@ async function fetchDomain(domain: Domain, fetchFn: typeof fetch): Promise<Accou
   return null;
 }
 
-export async function fetchYandexAccounts(fetchFn: typeof fetch = fetch): Promise<Account[]> {
+async function fetchByUid(account: PassportAccount, fetchFn: typeof fetch): Promise<Account> {
+  const known = hostByUid.get(account.uid);
+  const hosts = known ? [known, ...MAIL_HOSTS.filter((h) => h !== known)] : MAIL_HOSTS;
+  try {
+    for (const host of hosts) {
+      const mailbox = await fetchMailbox(host, account.uid, fetchFn);
+      if (mailbox) {
+        hostByUid.set(account.uid, host);
+        return mailbox;
+      }
+    }
+  } catch (err) {
+    return {
+      ...failed('yandex', account.email, inboxFor(account.uid), err),
+      id: `yandex:${account.uid}`,
+    };
+  }
+  hostByUid.delete(account.uid);
+  const err = new Error('ящик не найден');
+  return {
+    ...failed('yandex', account.email, inboxFor(account.uid), err),
+    id: `yandex:${account.uid}`,
+  };
+}
+
+function inboxFor(uid: string): string {
+  const host = hostByUid.get(uid) ?? 'mail.yandex.ru';
+  return `https://${host}/?uid=${uid}#/inbox`;
+}
+
+/** The pre-multi-account behavior: only the session's default account */
+async function fetchDefaultOnly(fetchFn: typeof fetch): Promise<Account[]> {
   let lastError: unknown;
-  for (const domain of DOMAINS) {
+  for (const host of FALLBACK_HOSTS) {
     try {
-      const account = await fetchDomain(domain, fetchFn);
+      const account = await fetchMailbox(host, undefined, fetchFn);
       if (account) return [account];
     } catch (err) {
       lastError = err;
@@ -188,7 +292,15 @@ export async function fetchYandexAccounts(fetchFn: typeof fetch = fetch): Promis
   return [signedOut('yandex', 'Яндекс Почта', LOGIN_URL)];
 }
 
+export async function fetchYandexAccounts(fetchFn: typeof fetch = fetch): Promise<Account[]> {
+  const accounts = await listPassportAccounts(fetchFn);
+  if (accounts === null) return fetchDefaultOnly(fetchFn);
+  if (accounts.length === 0) return [signedOut('yandex', 'Яндекс Почта', LOGIN_URL)];
+  return Promise.all(accounts.map((a) => fetchByUid(a, fetchFn)));
+}
+
 /** For tests */
 export function resetYandexSessions(): void {
   sessions.clear();
+  hostByUid.clear();
 }

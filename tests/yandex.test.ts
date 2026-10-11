@@ -61,40 +61,127 @@ describe('parseYandexMessages', () => {
 describe('fetchYandexAccounts', () => {
   beforeEach(resetYandexSessions);
 
-  const respond = (body: string, url: string) => {
-    const res = new Response(body);
-    Object.defineProperty(res, 'url', { value: url });
+  const PASSPORT = 'https://api.passport.yandex.ru/accounts';
+  const redirect = () => {
+    const res = new Response('');
+    Object.defineProperty(res, 'type', { value: 'opaqueredirect' });
     return res;
   };
+  const pageFor = (uid: string, email: string, ckey: string) =>
+    `<script>x={"uid":"${uid}","ckey":"${ckey}","default_email":"${email}"}</script>`;
+  const passport = (accounts: Array<{ uid: string; email: string }>, defaultUid: string) =>
+    new Response(
+      JSON.stringify({
+        accounts: accounts.map((a) => ({ uid: a.uid, defaultEmail: a.email, login: 'x' })),
+        default_uid: defaultUid,
+      }),
+    );
 
-  it('reloads the page once when the ckey is stale', async () => {
-    let posts = 0;
-    let pages = 0;
+  it('fetches every passport account from the host that serves it', async () => {
+    const posts: string[] = [];
     const fetchFn = (async (url: string, init?: RequestInit) => {
-      if (init?.method === 'POST') {
-        posts++;
-        const body = JSON.parse(String(init.body)) as { _ckey: string };
-        expect(body._ckey).toBe('abc/def!mv4');
-        if (posts === 1) {
-          const stale = { models: [{ name: 'messages', status: 'error', error: 'ckey' }] };
-          return respond(JSON.stringify(stale), url);
-        }
-        return respond(JSON.stringify(messages), url);
+      expect(init?.redirect ?? 'manual').toBe('manual');
+      if (url === PASSPORT) {
+        return passport(
+          [
+            { uid: '200', email: 'work@company.ru' },
+            { uid: '100', email: 'me@yandex.ru' },
+          ],
+          '100',
+        );
       }
-      pages++;
-      return respond(page, url);
+      if (init?.method === 'POST') {
+        const body = JSON.parse(String(init.body)) as { _ckey: string; _uid: string };
+        posts.push(`${new URL(url).host} ${body._uid} ${body._ckey}`);
+        return new Response(JSON.stringify(messages));
+      }
+      // Personal mailbox on mail.yandex.ru, Yandex 360 one on mail.360.yandex.ru
+      if (url === 'https://mail.yandex.ru/?uid=100')
+        return new Response(pageFor('100', 'me@yandex.ru', 'k1'));
+      if (url === 'https://mail.360.yandex.ru/?uid=200') {
+        return new Response(pageFor('200', 'work@company.ru', 'k2'));
+      }
+      return redirect();
     }) as unknown as typeof fetch;
 
-    const [acc] = await fetchYandexAccounts(fetchFn);
-    expect(acc?.status).toBe('ok');
-    expect(posts).toBe(2);
-    expect(pages).toBe(2);
+    const accounts = await fetchYandexAccounts(fetchFn);
+    // The default account comes first
+    expect(accounts.map((a) => [a.email, a.status])).toEqual([
+      ['me@yandex.ru', 'ok'],
+      ['work@company.ru', 'ok'],
+    ]);
+    expect(accounts[1]?.messages[0]?.url).toBe(
+      'https://mail.360.yandex.ru/?uid=200#/message/194499208907126502',
+    );
+    expect(accounts[1]?.inboxUrl).toBe('https://mail.360.yandex.ru/?uid=200#/inbox');
+    // Each account uses its own ckey
+    expect(posts.sort()).toEqual(['mail.360.yandex.ru 200 k2', 'mail.yandex.ru 100 k1']);
+
+    // The next poll goes straight to the known host, with cached sessions
+    posts.length = 0;
+    const pages: string[] = [];
+    const counting = (async (url: string, init?: RequestInit) => {
+      if (init?.method !== 'POST' && url !== PASSPORT) pages.push(url);
+      return fetchFn(url, init);
+    }) as unknown as typeof fetch;
+    await fetchYandexAccounts(counting);
+    expect(pages).toEqual([]);
+    expect(posts).toHaveLength(2);
   });
 
-  it('reports signed-out when redirected away from the mail domain', async () => {
-    const fetchFn = (async () =>
-      respond('', 'https://360.yandex.ru/mail/')) as unknown as typeof fetch;
+  it('ignores a page that belongs to another account', async () => {
+    const fetchFn = (async (url: string, init?: RequestInit) => {
+      if (url === PASSPORT) return passport([{ uid: '200', email: 'work@company.ru' }], '200');
+      if (init?.method === 'POST') return new Response(JSON.stringify(messages));
+      // Every host answers with someone else's mailbox
+      if (url.includes('?uid=')) return new Response(pageFor('999', 'other@yandex.ru', 'k'));
+      return redirect();
+    }) as unknown as typeof fetch;
+    const [acc] = await fetchYandexAccounts(fetchFn);
+    expect(acc).toMatchObject({ id: 'yandex:200', email: 'work@company.ru', status: 'error' });
+  });
+
+  it('reports signed-out when the passport list is empty', async () => {
+    const fetchFn = (async (url: string) =>
+      url === PASSPORT ? passport([], '') : redirect()) as unknown as typeof fetch;
     const [acc] = await fetchYandexAccounts(fetchFn);
     expect(acc?.status).toBe('signed-out');
+  });
+
+  describe('without the passport list (falls back to the default account)', () => {
+    it('reloads the page once when the ckey is stale', async () => {
+      let posts = 0;
+      let pages = 0;
+      const fetchFn = (async (url: string, init?: RequestInit) => {
+        if (url === PASSPORT) return new Response('', { status: 500 });
+        if (init?.method === 'POST') {
+          posts++;
+          const body = JSON.parse(String(init.body)) as { _ckey: string };
+          expect(body._ckey).toBe('abc/def!mv4');
+          if (posts === 1) {
+            const stale = { models: [{ name: 'messages', status: 'error', error: 'ckey' }] };
+            return new Response(JSON.stringify(stale));
+          }
+          return new Response(JSON.stringify(messages));
+        }
+        pages++;
+        return new Response(page);
+      }) as unknown as typeof fetch;
+
+      const [acc] = await fetchYandexAccounts(fetchFn);
+      expect(acc?.status).toBe('ok');
+      expect(posts).toBe(2);
+      expect(pages).toBe(2);
+    });
+
+    it('reports signed-out when the page redirects (to 360.yandex.ru / passport)', async () => {
+      const fetchFn = (async (url: string, init?: RequestInit) => {
+        if (url === PASSPORT) throw new TypeError('Failed to fetch');
+        expect(init?.redirect).toBe('manual');
+        return redirect();
+      }) as unknown as typeof fetch;
+      const [acc] = await fetchYandexAccounts(fetchFn);
+      expect(acc?.status).toBe('signed-out');
+    });
   });
 });
