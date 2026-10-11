@@ -3,7 +3,7 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   manifest: {
     name: 'Pulsar',
-    description: 'Непрочитанные письма Gmail и Яндекс Почты в одном месте',
+    description: 'Пульс вашей почты',
     permissions: ['alarms', 'storage', 'declarativeNetRequestWithHostAccess'],
     host_permissions: [
       'https://mail.google.com/*',

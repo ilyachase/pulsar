@@ -1,6 +1,6 @@
 {
   "name": "pulsar",
-  "description": "Индикатор непрочитанных писем Gmail и Яндекс Почты",
+  "description": "Пульс вашей почты",
   "private": true,
   "version": "0.1.0",
   "type": "module",
