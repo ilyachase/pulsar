@@ -4,3 +4,5 @@ node_modules
 web-ext.config.ts
 *.log
 .lavish
+CLAUDE.md
+.claude/
