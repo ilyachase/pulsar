@@ -1,16 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clampPollSeconds, formatDuration, normalizeSettings } from '../lib/settings';
-
-describe('normalizeSettings', () => {
-  it('keeps any whole number of seconds in range', () => {
-    expect(normalizeSettings({ pollSeconds: 45 })).toEqual({ pollSeconds: 45 });
-    expect(normalizeSettings({ pollSeconds: 900 })).toEqual({ pollSeconds: 900 });
-  });
-  it('defaults to 30 seconds when missing or unparsable', () => {
-    expect(normalizeSettings(undefined)).toEqual({ pollSeconds: 30 });
-    expect(normalizeSettings({ pollSeconds: 'x' })).toEqual({ pollSeconds: 30 });
-  });
-});
+import { clampPollSeconds, formatDuration, pollError } from '../lib/settings';
 
 describe('clampPollSeconds', () => {
   it('snaps into [30 s, 1 day] and rounds', () => {
@@ -30,6 +19,21 @@ describe('formatDuration', () => {
       '15 минут',
       '2 часа',
       '1 час',
+    ]);
+  });
+});
+
+describe('pollError', () => {
+  it('names the failed constraint, or null when acceptable', () => {
+    expect(['', 'abc', '45.5', '10', '100000', '30', '86400', ' 900 '].map(pollError)).toEqual([
+      'Укажите число секунд',
+      'Укажите число секунд',
+      'Только целое число секунд',
+      'Минимум 30 секунд',
+      'Максимум 86 400 секунд',
+      null,
+      null,
+      null,
     ]);
   });
 });

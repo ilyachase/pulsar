@@ -86,6 +86,8 @@ h1 {
 #poll {
   width: 140px;
   flex: none;
+  /* "required" is for validation only; the row label already names the field */
+  --wa-form-control-required-content: "";
 }
 #poll::part(input) {
   text-align: right;
@@ -95,13 +97,23 @@ h1 {
 .unit {
   color: var(--wa-color-text-quiet);
 }
-/* Error: danger color + an icon, so it isn't conveyed by color alone (WCAG 1.4.1) */
-#poll.invalid {
-  --wa-form-control-border-color: var(--wa-color-danger-border-loud);
-}
-.label:has(~ #poll.invalid) .desc {
+/*
+ * Errors show when the component says so — :state(user-invalid), i.e. after the user has typed
+ * and left the field — in danger color plus an icon, not color alone (WCAG 1.4.1).
+ */
+#poll-error {
+  display: none;
   color: var(--wa-color-danger-on-quiet);
   font-weight: var(--wa-font-weight-semibold);
+}
+#poll:state(user-invalid) {
+  --wa-form-control-border-color: var(--wa-color-danger-border-loud);
+}
+.label:has(~ #poll:state(user-invalid)) #poll-error {
+  display: inline-flex;
+}
+.label:has(~ #poll:state(user-invalid)) #poll-hint {
+  display: none;
 }
 
 .foot {

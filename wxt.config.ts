@@ -4,7 +4,7 @@ export default defineConfig({
   manifest: {
     name: 'Pulsar',
     description: 'Пульс вашей почты',
-    permissions: ['alarms', 'storage', 'declarativeNetRequestWithHostAccess'],
+    permissions: ['alarms', 'storage', 'notifications', 'declarativeNetRequestWithHostAccess'],
     host_permissions: [
       'https://mail.google.com/*',
       'https://mail.yandex.ru/*',

@@ -36,11 +36,19 @@
         <div class="row">
           <div class="label">
             <label class="name" for="poll">Проверять почту каждые</label>
-            <span id="poll-hint" class="desc" aria-live="polite"></span>
+            <span id="poll-hint" class="desc"></span>
+            <span id="poll-error" class="desc error" aria-live="polite">
+              <wa-icon name="circle-alert"></wa-icon><span id="poll-error-text"></span>
+            </span>
           </div>
           <wa-number-input id="poll" required step="1" without-steppers size="s">
             <span slot="end" class="unit">сек</span>
           </wa-number-input>
+        </div>
+        <wa-divider></wa-divider>
+        <div class="row">
+          <label class="name" for="notify">Уведомлять о новых письмах</label>
+          <wa-switch id="notify"></wa-switch>
         </div>
       </wa-card>
 
