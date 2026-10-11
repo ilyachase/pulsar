@@ -37,6 +37,9 @@ const ICONS: Record<string, string> = {
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#ea4335" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>',
   yandex:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#fc3f1d"/><path fill="#fff" d="M13.3 6h-1.1C10.3 6 9 7.3 9 9.3c0 1.7.8 2.6 2.3 3.6L9 18h1.8l2.5-5.6V18H15V6h-1.7zm0 5.6-.4-.2c-1.2-.8-1.8-1.4-1.8-2.6 0-1.3.8-2 1.8-2h.4v4.8z"/></svg>',
+  // Yandex 360 (organization mail) mark, redrawn from the official favicon on 360.yandex.ru
+  yandex360:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><radialGradient id="y360" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff783f"/><stop offset="1" stop-color="#ff6321"/></radialGradient></defs><circle cx="12" cy="12" r="12" fill="url(#y360)"/><g fill="#fff"><ellipse cx="12" cy="12" rx="4" ry="6.75"/><ellipse cx="3.75" cy="12" rx="2.1" ry="5.25"/><ellipse cx="20.25" cy="12" rx="2.1" ry="5.25"/></g></svg>',
 };
 
 export type IconName = keyof typeof ICONS;

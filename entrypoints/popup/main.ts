@@ -8,19 +8,11 @@ import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/skeleton/skeleton.js';
 import { plural } from '@/lib/plural';
 import type { Account, Message, State } from '@/lib/providers';
-import {
-  DEFAULT_SETTINGS,
-  describeInterval,
-  normalizeSettings,
-  SETTINGS_KEY,
-} from '@/lib/settings';
 import { STATE_KEY } from '@/lib/state';
 import { initTheme } from '@/lib/ui/theme';
 import { avatarHue, cleanSnippet, formatTime } from './format';
 
 initTheme();
-
-let pollText = describeInterval(DEFAULT_SETTINGS.pollSeconds);
 
 const list = document.getElementById('list') as HTMLElement;
 const summary = document.getElementById('summary') as HTMLElement;
@@ -53,9 +45,10 @@ function icon(name: string, attrs: Record<string, string> = {}): HTMLElement {
   return wa('wa-icon', { name, ...attrs });
 }
 
-function providerName(a: Account): string {
-  if (a.provider === 'gmail') return 'Gmail';
-  return a.inboxUrl.includes('360.yandex') ? 'Яндекс 360' : 'Яндекс Почта';
+/** Yandex 360 (organization) mailboxes live on mail.360.yandex.ru and get their own mark */
+function providerIcon(a: Account): string {
+  if (a.provider === 'yandex' && a.inboxUrl.includes('360.yandex')) return 'yandex360';
+  return a.provider;
 }
 
 function open(url: string): void {
@@ -95,13 +88,15 @@ function renderHead(a: Account, trailing: HTMLElement[]): HTMLButtonElement {
   head.title = a.status === 'signed-out' ? 'Войти' : 'Открыть ящик';
   const who = el('span', 'who');
   who.append(el('span', 'email', a.email));
-  head.append(icon(a.provider, { class: 'provider' }), who, ...trailing);
+  head.append(icon(providerIcon(a), { class: 'provider' }), who, ...trailing);
   head.addEventListener('click', () => open(a.inboxUrl));
   return head;
 }
 
-function renderWithMail(a: Account): HTMLElement {
-  const card = wa('wa-card', { 'with-header': true });
+function renderAccount(a: Account): HTMLElement {
+  const empty = a.messages.length === 0 && a.unreadCount === 0;
+  // Every account keeps its place; one with nothing unread is a single quiet header row
+  const card = wa('wa-card', { 'with-header': true, class: empty ? 'quiet' : '' });
   const openHint = el('span', 'open', 'Открыть ящик');
   openHint.append(icon('external'));
   const trailing: HTMLElement[] = [openHint];
@@ -144,52 +139,6 @@ function renderProblem(a: Account): HTMLElement {
   return card;
 }
 
-function renderCaughtUp(accounts: Account[], label: string): HTMLElement {
-  const row = el('div', 'caught');
-  if (label) row.append(el('span', 'caught-label', label));
-  for (const a of accounts) {
-    const chip = wa('wa-button', {
-      size: 'xs',
-      pill: true,
-      appearance: 'plain',
-      variant: 'neutral',
-    });
-    chip.title = `${providerName(a)} — открыть ящик`;
-    const start = icon(a.provider);
-    start.slot = 'start';
-    chip.append(start, a.email);
-    chip.addEventListener('click', () => open(a.inboxUrl));
-    row.append(chip);
-  }
-  return row;
-}
-
-function renderEmpty(accounts: Account[]): HTMLElement {
-  const empty = el('div', 'empty');
-  const art = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  art.setAttribute('viewBox', '0 0 64 64');
-  art.setAttribute('aria-hidden', 'true');
-  for (const [r, attrs] of [
-    ['30', { fill: 'none', stroke: 'currentColor', 'stroke-opacity': '.15', 'stroke-width': '2' }],
-    ['20', { fill: 'none', stroke: 'currentColor', 'stroke-opacity': '.3', 'stroke-width': '2' }],
-    ['8', { fill: 'currentColor' }],
-  ] as const) {
-    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', '32');
-    c.setAttribute('cy', '32');
-    c.setAttribute('r', r);
-    for (const [k, v] of Object.entries(attrs)) c.setAttribute(k, v);
-    art.append(c);
-  }
-  empty.append(
-    art,
-    el('h2', undefined, 'Всё прочитано'),
-    el('p', undefined, `Pulsar проверяет почту ${pollText}`),
-    renderCaughtUp(accounts, ''),
-  );
-  return empty;
-}
-
 let lastContent = '';
 
 function render(state: State | undefined, animate = false): void {
@@ -206,9 +155,6 @@ function render(state: State | undefined, animate = false): void {
   }
 
   const ok = state.accounts.filter((a) => a.status === 'ok');
-  const withMail = ok.filter((a) => a.messages.length > 0 || a.unreadCount > 0);
-  const quiet = ok.filter((a) => !withMail.includes(a));
-  const problems = state.accounts.filter((a) => a.status !== 'ok');
   const total = ok.reduce((s, a) => s + a.unreadCount, 0);
 
   summary.replaceChildren();
@@ -222,12 +168,9 @@ function render(state: State | undefined, animate = false): void {
   }
   logo.classList.toggle('live', total > 0);
 
-  for (const a of withMail) list.append(renderWithMail(a));
-  for (const a of problems) list.append(renderProblem(a));
-  if (withMail.length === 0 && problems.length === 0) {
-    list.append(renderEmpty(quiet));
-  } else if (quiet.length > 0) {
-    list.append(renderCaughtUp(quiet, 'Всё прочитано:'));
+  // Accounts always render in the same order, so nothing jumps when mail arrives or is read
+  for (const a of state.accounts) {
+    list.append(a.status === 'ok' ? renderAccount(a) : renderProblem(a));
   }
 }
 
@@ -252,8 +195,7 @@ browser.storage.onChanged.addListener((changes, area) => {
 });
 
 // Render the cache instantly (the only animated paint), then quietly fetch fresh data
-void browser.storage.local.get([STATE_KEY, SETTINGS_KEY]).then((cached) => {
-  pollText = describeInterval(normalizeSettings(cached[SETTINGS_KEY]).pollSeconds);
+void browser.storage.local.get(STATE_KEY).then((cached) => {
   render(cached[STATE_KEY] as State | undefined, true);
   void refresh(true);
 });
