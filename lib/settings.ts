@@ -42,3 +42,20 @@ export function describeInterval(seconds: number): string {
     return every(seconds / 60, ['минуту', 'минуты', 'минут'], 'каждую минуту');
   return every(seconds, ['секунду', 'секунды', 'секунд'], 'каждую секунду');
 }
+
+/**
+ * A human duration for a number of seconds, only when it says more than the seconds themselves:
+ * 45 → null, 900 → "15 минут", 7200 → "2 часа", 90 → "1 мин 30 с"
+ */
+export function formatDuration(seconds: number): string | null {
+  if (seconds < 60) return null;
+  if (seconds % 3600 === 0) {
+    const h = seconds / 3600;
+    return `${h} ${plural(h, ['час', 'часа', 'часов'])}`;
+  }
+  if (seconds % 60 === 0) {
+    const m = seconds / 60;
+    return `${m} ${plural(m, ['минута', 'минуты', 'минут'])}`;
+  }
+  return `${Math.floor(seconds / 60)} мин ${seconds % 60} с`;
+}

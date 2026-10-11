@@ -4,8 +4,9 @@ import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/number-input/number-input.js';
 import '@awesome.me/webawesome/dist/components/radio/radio.js';
 import '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
+import '@awesome.me/webawesome/dist/components/divider/divider.js';
 import {
-  describeInterval,
+  formatDuration,
   MAX_POLL_SECONDS,
   MIN_POLL_SECONDS,
   normalizeSettings,
@@ -24,9 +25,8 @@ import {
 
 initTheme();
 
-// Theme: a radio group rendered as icon buttons
+// Theme: a radio group rendered as icon buttons (the selected one is highlighted, names in tooltips)
 const themeGroup = document.getElementById('theme') as HTMLElement & { value: string };
-const themeDesc = document.getElementById('theme-desc') as HTMLElement;
 
 for (const mode of THEME_MODES) {
   const radio = document.createElement('wa-radio');
@@ -40,12 +40,7 @@ for (const mode of THEME_MODES) {
   themeGroup.append(radio);
 }
 themeGroup.setAttribute('value', getThemeMode());
-themeDesc.textContent = THEME_LABEL[getThemeMode()];
-themeGroup.addEventListener('change', () => {
-  const mode = themeGroup.value as ThemeMode;
-  setThemeMode(mode);
-  themeDesc.textContent = THEME_LABEL[mode];
-});
+themeGroup.addEventListener('change', () => setThemeMode(themeGroup.value as ThemeMode));
 
 // Poll interval: a free number of seconds, saved while typing
 const poll = document.getElementById('poll') as HTMLElement & { value: string | number | null };
@@ -76,7 +71,9 @@ function showPollHint(): void {
   poll.classList.toggle('invalid', n === null && errorShown);
   pollHint.replaceChildren();
   if (n !== null) {
-    pollHint.textContent = `Pulsar будет проверять почту ${describeInterval(n)}`;
+    // Only when the seconds aren't self-explanatory: 900 → "= 15 минут", 30 → nothing
+    const human = formatDuration(n);
+    pollHint.textContent = human ? `= ${human}` : '';
     return;
   }
   if (!errorShown) {

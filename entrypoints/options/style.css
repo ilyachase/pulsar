@@ -46,14 +46,6 @@ h1 {
   font-size: var(--wa-font-size-s);
 }
 
-wa-card h2 {
-  margin: 0 0 var(--wa-space-m);
-  font-size: var(--wa-font-size-xs);
-  font-weight: var(--wa-font-weight-semibold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--wa-color-text-quiet);
-}
 .row {
   display: flex;
   align-items: center;
@@ -67,6 +59,9 @@ wa-card h2 {
 }
 .name {
   font-weight: var(--wa-font-weight-semibold);
+}
+.desc:empty {
+  display: none;
 }
 .desc {
   display: inline-flex;

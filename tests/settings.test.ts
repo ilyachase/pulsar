@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { clampPollSeconds, describeInterval, normalizeSettings } from '../lib/settings';
+import {
+  clampPollSeconds,
+  describeInterval,
+  formatDuration,
+  normalizeSettings,
+} from '../lib/settings';
 
 describe('normalizeSettings', () => {
   it('keeps any whole number of seconds in range', () => {
@@ -33,6 +38,20 @@ describe('describeInterval', () => {
       'каждый час',
       'каждые 2 часа',
       'каждые 5 часов',
+    ]);
+  });
+});
+
+describe('formatDuration', () => {
+  it('is silent when the seconds speak for themselves, converts otherwise', () => {
+    expect([30, 59, 60, 90, 900, 7200, 3600].map(formatDuration)).toEqual([
+      null,
+      null,
+      '1 минута',
+      '1 мин 30 с',
+      '15 минут',
+      '2 часа',
+      '1 час',
     ]);
   });
 });
