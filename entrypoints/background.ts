@@ -19,17 +19,19 @@ const ALARM = 'poll';
  * Requests from the service worker carry Origin: chrome-extension://…; mail services may reject
  * them as cross-site. For requests outside tabs (tabId -1, i.e. ours) we set the mail's own origin.
  */
-const YANDEX_ORIGINS: Record<string, string> = {
+const MAIL_ORIGINS: Record<string, string> = {
   'mail.yandex.ru': 'https://mail.yandex.ru',
   'mail.yandex.com': 'https://mail.yandex.com',
   'mail.360.yandex.ru': 'https://mail.360.yandex.ru',
   // The account list is requested by the mail page itself, so it sees the mail origin
   'api.passport.yandex.ru': 'https://mail.yandex.ru',
+  'e.mail.ru': 'https://e.mail.ru',
+  'portal.mail.ru': 'https://e.mail.ru',
 };
-const MAX_RULE_ID = 10;
+const MAX_RULE_ID = 50;
 
 async function installHeaderRules(): Promise<void> {
-  const origins = { ...YANDEX_ORIGINS };
+  const origins = { ...MAIL_ORIGINS };
   // WorkMail lives on a per-organization region host taken from the settings
   const workmail = parseWorkmailUrl((await workmailUrlItem.getValue()) ?? '');
   if (workmail) origins[workmail.hostname] = workmail.origin;

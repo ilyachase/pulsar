@@ -66,5 +66,8 @@ yandex:
   error: "Yandex: $1"
   mailboxNotFound: caixa não encontrada
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: pasta Caixa de entrada não encontrada

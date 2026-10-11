@@ -65,5 +65,8 @@ yandex:
   error: "Yandex: $1"
   mailboxNotFound: mailbox not found
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: no Inbox folder

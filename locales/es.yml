@@ -66,5 +66,8 @@ yandex:
   error: "Yandex: $1"
   mailboxNotFound: buzón no encontrado
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: no hay carpeta Bandeja de entrada

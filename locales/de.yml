@@ -62,5 +62,8 @@ yandex:
   error: "Yandex: $1"
   mailboxNotFound: Postfach nicht gefunden
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: Ordner „Posteingang“ fehlt

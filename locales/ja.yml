@@ -58,5 +58,8 @@ yandex:
   error: "Yandex: $1"
   mailboxNotFound: メールボックスが見つかりません
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: 受信トレイ フォルダがありません

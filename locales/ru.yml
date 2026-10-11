@@ -71,5 +71,8 @@ yandex:
   error: "Яндекс: $1"
   mailboxNotFound: ящик не найден
 
+mailru:
+  name: Почта Mail
+
 workmail:
   noInbox: нет папки «Входящие»

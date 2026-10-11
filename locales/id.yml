@@ -58,5 +58,8 @@ yandex:
   error: "Yandex: $1"
   mailboxNotFound: kotak surat tidak ditemukan
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: folder Kotak Masuk tidak ada

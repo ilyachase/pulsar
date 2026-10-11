@@ -1,5 +1,6 @@
 import { workmailUrlItem } from '../settings-store';
 import { fetchGmailAccounts } from './gmail';
+import { fetchMailruAccounts } from './mailru';
 import type { Account } from './types';
 import { fetchWorkmailAccounts } from './workmail';
 import { fetchYandexAccounts } from './yandex';
@@ -10,6 +11,7 @@ export type { Account, Message, State } from './types';
 const providers: Array<() => Promise<Account[]>> = [
   fetchGmailAccounts,
   fetchYandexAccounts,
+  fetchMailruAccounts,
   async () => fetchWorkmailAccounts(await workmailUrlItem.getValue()),
 ];
 

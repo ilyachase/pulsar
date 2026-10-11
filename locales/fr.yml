@@ -66,5 +66,8 @@ yandex:
   error: "Yandex : $1"
   mailboxNotFound: boîte introuvable
 
+mailru:
+  name: Mail.ru
+
 workmail:
   noInbox: dossier Boîte de réception introuvable

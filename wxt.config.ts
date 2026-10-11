@@ -15,6 +15,8 @@ export default defineConfig({
       'https://mail.yandex.com/*',
       'https://mail.360.yandex.ru/*',
       'https://api.passport.yandex.ru/*',
+      'https://e.mail.ru/*',
+      'https://portal.mail.ru/*',
     ],
     action: { default_title: 'Pulsar' },
   },
