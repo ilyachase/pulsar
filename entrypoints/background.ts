@@ -8,15 +8,16 @@ import {
 } from '@/lib/notify';
 import { plural } from '@/lib/plural';
 import { fetchAllAccounts, type State } from '@/lib/providers';
+import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import { clampPollSeconds } from '@/lib/settings';
-import { notifyItem, pollSecondsItem } from '@/lib/settings-store';
+import { notifyItem, pollSecondsItem, workmailUrlItem } from '@/lib/settings-store';
 import { hideOpenedSince, markRead, openedKey, STATE_KEY } from '@/lib/state';
 
 const ALARM = 'poll';
 
 /**
- * Requests from the service worker carry Origin: chrome-extension://…; Yandex may reject them
- * as cross-site. For requests outside tabs (tabId -1, i.e. ours) we set the mail's own origin.
+ * Requests from the service worker carry Origin: chrome-extension://…; mail services may reject
+ * them as cross-site. For requests outside tabs (tabId -1, i.e. ours) we set the mail's own origin.
  */
 const YANDEX_ORIGINS: Record<string, string> = {
   'mail.yandex.ru': 'https://mail.yandex.ru',
@@ -28,7 +29,11 @@ const YANDEX_ORIGINS: Record<string, string> = {
 const MAX_RULE_ID = 10;
 
 async function installHeaderRules(): Promise<void> {
-  const rules = Object.entries(YANDEX_ORIGINS).map(([domain, origin], i) => ({
+  const origins = { ...YANDEX_ORIGINS };
+  // WorkMail lives on a per-organization region host taken from the settings
+  const workmail = parseWorkmailUrl((await workmailUrlItem.getValue()) ?? '');
+  if (workmail) origins[workmail.hostname] = workmail.origin;
+  const rules = Object.entries(origins).map(([domain, origin], i) => ({
     id: i + 1,
     priority: 1,
     action: {
@@ -165,6 +170,7 @@ export default defineBackground(() => {
   browser.notifications.onClicked.addListener((id) => void onNotificationClicked(id));
 
   pollSecondsItem.watch(() => void ensureAlarm());
+  workmailUrlItem.watch(() => void installHeaderRules().then(() => poll(false)));
 
   const start = async () => {
     await installHeaderRules();

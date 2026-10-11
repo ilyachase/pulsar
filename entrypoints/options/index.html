@@ -50,6 +50,18 @@
           <label class="name" for="notify">Уведомлять о новых письмах</label>
           <wa-switch id="notify"></wa-switch>
         </div>
+        <wa-divider></wa-divider>
+        <div class="row workmail">
+          <div class="label">
+            <label class="name" for="workmail-url">Amazon WorkMail</label>
+            <span id="workmail-hint" class="desc"></span>
+          </div>
+          <div class="workmail-controls">
+            <wa-input id="workmail-url" type="url" size="s" placeholder="Ссылка на вашу почту WorkMail"></wa-input>
+            <wa-button id="workmail-connect" size="s" variant="brand">Подключить</wa-button>
+            <wa-button id="workmail-disconnect" size="s" appearance="outlined" hidden>Отключить</wa-button>
+          </div>
+        </div>
       </wa-card>
 
       <footer id="version" class="foot"></footer>

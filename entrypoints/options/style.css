@@ -129,3 +129,17 @@ h1 {
     align-items: flex-start;
   }
 }
+
+.workmail-controls {
+  display: flex;
+  gap: var(--wa-space-xs);
+  align-items: center;
+  flex: none;
+}
+#workmail-url {
+  width: 300px;
+}
+#workmail-hint.error {
+  color: var(--wa-color-danger-on-quiet);
+  font-weight: var(--wa-font-weight-semibold);
+}

@@ -1,11 +1,17 @@
+import { workmailUrlItem } from '../settings-store';
 import { fetchGmailAccounts } from './gmail';
 import type { Account } from './types';
+import { fetchWorkmailAccounts } from './workmail';
 import { fetchYandexAccounts } from './yandex';
 
 export type { Account, Message, State } from './types';
 
 /** To add a provider, write an adapter with a fetch…Accounts() function and list it here */
-const providers: Array<() => Promise<Account[]>> = [fetchGmailAccounts, fetchYandexAccounts];
+const providers: Array<() => Promise<Account[]>> = [
+  fetchGmailAccounts,
+  fetchYandexAccounts,
+  async () => fetchWorkmailAccounts(await workmailUrlItem.getValue()),
+];
 
 export async function fetchAllAccounts(): Promise<Account[]> {
   const results = await Promise.allSettled(providers.map((p) => p()));

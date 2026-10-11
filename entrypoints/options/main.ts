@@ -6,6 +6,9 @@ import '@awesome.me/webawesome/dist/components/radio/radio.js';
 import '@awesome.me/webawesome/dist/components/radio-group/radio-group.js';
 import '@awesome.me/webawesome/dist/components/switch/switch.js';
 import '@awesome.me/webawesome/dist/components/divider/divider.js';
+import '@awesome.me/webawesome/dist/components/input/input.js';
+import '@awesome.me/webawesome/dist/components/button/button.js';
+import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import {
   clampPollSeconds,
   formatDuration,
@@ -13,7 +16,7 @@ import {
   MIN_POLL_SECONDS,
   pollError,
 } from '@/lib/settings';
-import { notifyItem, pollSecondsItem } from '@/lib/settings-store';
+import { notifyItem, pollSecondsItem, workmailUrlItem } from '@/lib/settings-store';
 import {
   getThemeMode,
   initTheme,
@@ -88,6 +91,51 @@ const notifySwitch = document.getElementById('notify') as HTMLElement & { checke
 void notifyItem.getValue().then((enabled) => {
   notifySwitch.checked = enabled;
   notifySwitch.addEventListener('change', () => void notifyItem.setValue(notifySwitch.checked));
+});
+
+// Amazon WorkMail: the web client URL differs per organization (region host), so the user pastes it;
+// access to that host is requested via Chrome's optional host permissions on connect.
+const workmailInput = document.getElementById('workmail-url') as HTMLElement & {
+  value: string;
+  disabled: boolean;
+};
+const workmailConnect = document.getElementById('workmail-connect') as HTMLElement;
+const workmailDisconnect = document.getElementById('workmail-disconnect') as HTMLElement;
+const workmailHint = document.getElementById('workmail-hint') as HTMLElement;
+
+function renderWorkmail(url: string | null, error = ''): void {
+  workmailInput.value = url ?? workmailInput.value;
+  workmailInput.disabled = !!url;
+  workmailConnect.hidden = !!url;
+  workmailDisconnect.hidden = !url;
+  workmailHint.classList.toggle('error', !!error);
+  workmailHint.textContent = error;
+}
+
+void workmailUrlItem.getValue().then((url) => renderWorkmail(url));
+
+workmailConnect.addEventListener('click', async () => {
+  const url = parseWorkmailUrl(workmailInput.value);
+  if (!url) {
+    renderWorkmail(null, 'Нужна ссылка вида https://webmail.mail.<регион>.awsapps.com/workmail/');
+    return;
+  }
+  // Must run inside the click (user gesture) for Chrome to show its permission prompt
+  const granted = await browser.permissions.request({ origins: [`${url.origin}/*`] });
+  if (!granted) {
+    renderWorkmail(null, 'Chrome не выдал доступ к адресу почты');
+    return;
+  }
+  await workmailUrlItem.setValue(url.toString());
+  renderWorkmail(url.toString());
+});
+
+workmailDisconnect.addEventListener('click', async () => {
+  const url = parseWorkmailUrl((await workmailUrlItem.getValue()) ?? '');
+  await workmailUrlItem.setValue(null);
+  if (url) await browser.permissions.remove({ origins: [`${url.origin}/*`] });
+  workmailInput.value = '';
+  renderWorkmail(null);
 });
 
 (document.getElementById('version') as HTMLElement).textContent =

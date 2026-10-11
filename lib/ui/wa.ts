@@ -40,6 +40,9 @@ const ICONS: Record<string, string> = {
   // Yandex 360 (organization mail) mark, redrawn from the official favicon on 360.yandex.ru
   yandex360:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><radialGradient id="y360" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff783f"/><stop offset="1" stop-color="#ff6321"/></radialGradient></defs><circle cx="12" cy="12" r="12" fill="url(#y360)"/><g fill="#fff"><ellipse cx="12" cy="12" rx="4" ry="6.75"/><ellipse cx="3.75" cy="12" rx="2.1" ry="5.25"/><ellipse cx="20.25" cy="12" rx="2.1" ry="5.25"/></g></svg>',
+  // Amazon WorkMail mark, redrawn from the web client's favicon: a green envelope frame + flap
+  workmail:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g fill="#69a543"><path fill-rule="evenodd" d="M0 0h32v32H0zM3 3v26h26V3z"/><path d="M3.5 3h25L16 15.5z"/></g></svg>',
 };
 
 export type IconName = keyof typeof ICONS;
