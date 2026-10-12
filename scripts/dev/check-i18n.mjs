@@ -3,7 +3,8 @@ import { browserWs, connect } from './cdp.mjs';
 // Opens Pulsar's popup and settings pages in background tabs, prints their UI texts (no mail data), closes them
 const port = process.argv[2] ?? '9333';
 const ext = process.argv[3] ?? 'pclhojjmopmkhpncofgmknocknmkpakg';
-const ws = (await (await fetch(`http://127.0.0.1:${port}/json/version`)).json()).webSocketDebuggerUrl;
+const ws = (await (await fetch(`http://127.0.0.1:${port}/json/version`)).json())
+  .webSocketDebuggerUrl;
 const cdp = await connect(ws);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const probe = {
@@ -29,11 +30,21 @@ const probe = {
   }))()`,
 };
 for (const [page, expression] of Object.entries(probe)) {
-  const { targetId } = await cdp.send('Target.createTarget', { url: `chrome-extension://${ext}/${page}.html`, background: true });
+  const { targetId } = await cdp.send('Target.createTarget', {
+    url: `chrome-extension://${ext}/${page}.html`,
+    background: true,
+  });
   const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
   await sleep(page === 'popup' ? 6000 : 2000);
-  const r = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, sessionId);
-  console.log(page, JSON.stringify(r.result.value ?? r.exceptionDetails?.exception?.description, null, 1));
+  const r = await cdp.send(
+    'Runtime.evaluate',
+    { expression, awaitPromise: true, returnByValue: true },
+    sessionId,
+  );
+  console.log(
+    page,
+    JSON.stringify(r.result.value ?? r.exceptionDetails?.exception?.description, null, 1),
+  );
   await cdp.send('Target.closeTarget', { targetId });
 }
 cdp.close();

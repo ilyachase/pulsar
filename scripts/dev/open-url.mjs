@@ -6,8 +6,19 @@ const cdp = await connect(await browserWs());
 const { targetId } = await cdp.send('Target.createTarget', { url, background: true });
 const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
 await new Promise((r) => setTimeout(r, 7000));
-const r = await cdp.send('Runtime.evaluate', { expression: `({ url: location.href, found: document.body.innerText.includes(${JSON.stringify(needle ?? '')}) })`, returnByValue: true }, sessionId);
+const r = await cdp.send(
+  'Runtime.evaluate',
+  {
+    expression: `({ url: location.href, found: document.body.innerText.includes(${JSON.stringify(needle ?? '')}) })`,
+    returnByValue: true,
+  },
+  sessionId,
+);
 const v = r.result.value;
-console.log(v.url.replace(/\d{6,}/g, (m) => `<${m.length}d>`), 'found:', v.found);
+console.log(
+  v.url.replace(/\d{6,}/g, (m) => `<${m.length}d>`),
+  'found:',
+  v.found,
+);
 await cdp.send('Target.closeTarget', { targetId });
 cdp.close();

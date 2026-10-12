@@ -5,7 +5,10 @@ import { browserWs, connect } from './cdp.mjs';
 // makes newer Chromium disable a --load-extension extension ("unsupportedDeveloperExtension").
 // Re-enables Pulsar if Chromium disabled it, e.g. while a rebuild replaced .output.
 const cdp = await connect(await browserWs());
-const { targetId } = await cdp.send('Target.createTarget', { url: 'chrome://extensions', background: true });
+const { targetId } = await cdp.send('Target.createTarget', {
+  url: 'chrome://extensions',
+  background: true,
+});
 const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
 await new Promise((r) => setTimeout(r, 1500));
 const { result, exceptionDetails } = await cdp.send(
@@ -26,4 +29,7 @@ const { result, exceptionDetails } = await cdp.send(
 await cdp.send('Target.closeTarget', { targetId });
 cdp.close();
 if (exceptionDetails) console.log('reload failed:', exceptionDetails.exception?.description);
-else console.log(result.value ? `reloaded Pulsar (${result.value})` : 'Pulsar not found in chrome://extensions');
+else
+  console.log(
+    result.value ? `reloaded Pulsar (${result.value})` : 'Pulsar not found in chrome://extensions',
+  );

@@ -4,9 +4,20 @@ import { browserWs, connect } from './cdp.mjs';
 const cdp = await connect(await browserWs());
 const { targetInfos } = await cdp.send('Target.getTargets');
 let summary = null;
-for (const w of targetInfos.filter((t) => t.type === 'service_worker' && t.url.startsWith('chrome-extension://'))) {
-  const { sessionId } = await cdp.send('Target.attachToTarget', { targetId: w.targetId, flatten: true });
-  const name = (await cdp.send('Runtime.evaluate', { expression: 'chrome.runtime.getManifest().name', returnByValue: true }, sessionId)).result.value;
+for (const w of targetInfos.filter(
+  (t) => t.type === 'service_worker' && t.url.startsWith('chrome-extension://'),
+)) {
+  const { sessionId } = await cdp.send('Target.attachToTarget', {
+    targetId: w.targetId,
+    flatten: true,
+  });
+  const name = (
+    await cdp.send(
+      'Runtime.evaluate',
+      { expression: 'chrome.runtime.getManifest().name', returnByValue: true },
+      sessionId,
+    )
+  ).result.value;
   if (name !== 'Pulsar') {
     await cdp.send('Target.detachFromTarget', { sessionId });
     continue;
