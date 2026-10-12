@@ -74,6 +74,7 @@ options:
   workmailBadUrl: "Introduce un enlace como https://webmail.mail.<región>.awsapps.com/workmail/"
   workmailDenied: Chrome no concedió acceso al sitio del correo
   disconnectedTitle: "Buzones desconectados"
+  madeBy: "Hecho con ❤️ por $1"
 
 yandex:
   name: Yandex Mail

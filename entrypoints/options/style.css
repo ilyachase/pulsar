@@ -126,6 +126,12 @@ h1 {
   color: var(--wa-color-text-quiet);
   font-size: var(--wa-font-size-xs);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wa-space-3xs);
+}
+.foot a {
+  color: var(--wa-color-text-link);
 }
 
 @media (max-width: 560px) {

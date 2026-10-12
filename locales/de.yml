@@ -70,6 +70,7 @@ options:
   workmailBadUrl: "Benötigt wird ein Link wie https://webmail.mail.<Region>.awsapps.com/workmail/"
   workmailDenied: Chrome hat keinen Zugriff auf die E-Mail-Website gewährt
   disconnectedTitle: "Getrennte Postfächer"
+  madeBy: "Mit ❤️ erstellt von $1"
 
 yandex:
   name: Yandex Mail

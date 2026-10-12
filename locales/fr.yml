@@ -74,6 +74,7 @@ options:
   workmailBadUrl: "Il faut un lien du type https://webmail.mail.<région>.awsapps.com/workmail/"
   workmailDenied: Chrome n’a pas accordé l’accès au site de la messagerie
   disconnectedTitle: "Boîtes déconnectées"
+  madeBy: "Fait avec ❤️ par $1"
 
 yandex:
   name: Yandex Mail

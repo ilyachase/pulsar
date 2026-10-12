@@ -66,6 +66,7 @@ options:
   workmailBadUrl: "Masukkan link seperti https://webmail.mail.<region>.awsapps.com/workmail/"
   workmailDenied: Chrome tidak memberi akses ke situs email
   disconnectedTitle: "Kotak surat yang diputuskan"
+  madeBy: "Dibuat dengan ❤️ oleh $1"
 
 yandex:
   name: Yandex Mail

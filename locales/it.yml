@@ -74,6 +74,7 @@ options:
   workmailBadUrl: "Serve un link come https://webmail.mail.<regione>.awsapps.com/workmail/"
   workmailDenied: Chrome non ha concesso l'accesso al sito della posta
   disconnectedTitle: "Caselle scollegate"
+  madeBy: "Fatto con ❤️ da $1"
 
 yandex:
   name: Yandex Mail

@@ -73,6 +73,7 @@ options:
   workmailBadUrl: "Enter a link like https://webmail.mail.<region>.awsapps.com/workmail/"
   workmailDenied: Chrome didn't grant access to the mail address
   disconnectedTitle: "Disconnected mailboxes"
+  madeBy: "Made with ❤️ by $1"
 
 yandex:
   name: Yandex Mail

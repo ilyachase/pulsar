@@ -70,6 +70,7 @@ options:
   workmailBadUrl: "https://webmail.mail.<bölge>.awsapps.com/workmail/ biçiminde bir bağlantı girin"
   workmailDenied: Chrome posta sitesine erişim izni vermedi
   disconnectedTitle: "Bağlantısı kesilen posta kutuları"
+  madeBy: "$1 tarafından ❤️ ile yapıldı"
 
 yandex:
   name: Yandex Mail

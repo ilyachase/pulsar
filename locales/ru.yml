@@ -79,6 +79,7 @@ options:
   workmailBadUrl: "Нужна ссылка вида https://webmail.mail.<регион>.awsapps.com/workmail/"
   workmailDenied: Chrome не выдал доступ к адресу почты
   disconnectedTitle: "Отключённые ящики"
+  madeBy: "Сделано с ❤️ автором $1"
 
 yandex:
   name: Яндекс Почта

@@ -341,3 +341,18 @@ browser.storage.onChanged.addListener((changes, area) => {
 
 (document.getElementById('version') as HTMLElement).textContent =
   `Pulsar ${browser.runtime.getManifest().version}`;
+
+// "Made with ❤️ by <author>": the name goes into the message via $1 (word order differs by language)
+// and becomes a link to the author's GitHub
+const AUTHOR = 'Ilya L.';
+const madeBy = document.getElementById('made-by') as HTMLElement;
+const [before = '', after = ''] = (i18n.t as (key: string, s: string[]) => string)(
+  'options.madeBy',
+  [AUTHOR],
+).split(AUTHOR);
+const author = document.createElement('a');
+author.href = 'https://github.com/ilyachase';
+author.target = '_blank';
+author.rel = 'noopener noreferrer';
+author.textContent = AUTHOR;
+madeBy.append(before, author, after);

@@ -66,6 +66,7 @@ options:
   workmailBadUrl: "https://webmail.mail.<リージョン>.awsapps.com/workmail/ の形式のリンクを入力してください"
   workmailDenied: Chrome がメールサイトへのアクセスを許可しませんでした
   disconnectedTitle: "切断したメールボックス"
+  madeBy: "$1 が ❤️ を込めて作りました"
 
 yandex:
   name: Yandex Mail
