@@ -12,6 +12,8 @@ const LOGIN_URL =
   'https://accounts.google.com/ServiceLogin?service=mail&continue=https://mail.google.com/mail/';
 
 const parser = new XMLParser({
+  // Gmail writes apostrophes and quotes in titles and snippets as &#39; / &quot;
+  htmlEntities: true,
   ignoreAttributes: false,
   attributeNamePrefix: '',
   isArray: (name) => name === 'entry' || name === 'link',

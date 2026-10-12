@@ -19,7 +19,7 @@ describe('parseGmailFeed', () => {
       from: 'Анна Петрова',
       fromEmail: 'anna@example.com',
       subject: 'Встреча в четверг & планы',
-      snippet: 'Привет! Давай перенесём на 15:00',
+      snippet: "Привет! Давай перенесём на 15:00, it's ok?",
       date: Date.parse('2026-10-10T09:41:00Z'),
       url: 'https://mail.google.com/mail/u/0?account_id=test.user@gmail.com&message_id=19a1b2c3d4e5f607&view=conv&extsrc=atom',
     });
