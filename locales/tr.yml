@@ -30,16 +30,7 @@ popup:
   undo: "Geri al"
 
 badge:
-  noNew: yeni e-posta yok
   empty: "Bu tarayıcıda e-postanıza giriş yapın, Pulsar posta kutularınızı kendisi bulur"
-  allFailed: e-postalar kontrol edilemedi
-  allSignedOut: oturum açılmadı
-  failedIn:
-    one: $1 posta kutusunda hata
-    other: $1 posta kutusunda hata
-  signedOutIn:
-    one: $1 posta kutusunda oturum açılmadı
-    other: $1 posta kutusunda oturum açılmadı
 
 options:
   title: Pulsar — Ayarlar

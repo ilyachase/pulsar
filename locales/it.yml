@@ -32,18 +32,7 @@ popup:
   undo: "Annulla"
 
 badge:
-  noNew: nessuna nuova email
   empty: "Accedi alla tua posta in questo browser e Pulsar troverà da solo le tue caselle"
-  allFailed: impossibile controllare la posta
-  allSignedOut: accesso non effettuato
-  failedIn:
-    one: errore in $1 casella
-    many: errori in $1 caselle
-    other: errori in $1 caselle
-  signedOutIn:
-    one: accesso non effettuato in $1 casella
-    many: accesso non effettuato in $1 caselle
-    other: accesso non effettuato in $1 caselle
 
 options:
   title: Pulsar — Impostazioni

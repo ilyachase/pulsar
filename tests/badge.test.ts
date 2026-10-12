@@ -31,28 +31,9 @@ describe('computeBadge', () => {
 describe('services never signed in to', () => {
   const prompt = signedOut('mailru', 'Почта Mail', '#');
   it('are not counted as signed-out mailboxes', () => {
-    expect(computeBadge([acc('ok', 2), prompt]).title).toBe('Pulsar — 2 новых письма');
+    expect(computeBadge([acc('ok', 2), prompt]).text).toBe('2');
   });
   it('alone mean nothing is signed in', () => {
     expect(computeBadge([prompt]).text).toBe('?');
-  });
-});
-
-describe('badge tooltip', () => {
-  const title = (accounts: Account[]) => computeBadge(accounts).title;
-
-  it('is a one-line summary, never a per-account list', () => {
-    expect(title([acc('ok', 3), acc('ok', 2)])).toBe('Pulsar — 5 новых писем');
-    expect(title([acc('ok', 1)])).toBe('Pulsar — 1 новое письмо');
-    expect(title([acc('ok', 2)])).toBe('Pulsar — 2 новых письма');
-    expect(title([acc('ok', 0)])).toBe('Pulsar — новых писем нет');
-    expect(title([acc('ok', 3)])).not.toContain('\n');
-  });
-  it('mentions problem accounts briefly', () => {
-    expect(title([acc('ok', 3), acc('error'), acc('signed-out')])).toBe(
-      'Pulsar — 3 новых письма · ошибка в 1 ящике · вход не выполнен в 1 ящике',
-    );
-    expect(title([acc('signed-out')])).toBe('Pulsar — не выполнен вход');
-    expect(title([acc('error')])).toBe('Pulsar — не удалось проверить почту');
   });
 });

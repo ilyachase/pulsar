@@ -72,7 +72,6 @@ async function publish(state: State): Promise<void> {
   const badge = computeBadge(state.accounts);
   await browser.action.setBadgeText({ text: badge.text });
   await browser.action.setBadgeBackgroundColor({ color: badge.color });
-  await browser.action.setTitle({ title: badge.title });
 }
 
 const SUMMARY_NOTIFICATION = 'summary';

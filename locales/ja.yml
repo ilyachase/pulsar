@@ -28,14 +28,7 @@ popup:
   undo: "元に戻す"
 
 badge:
-  noNew: 新着メールなし
   empty: "このブラウザでメールにログインすると、Pulsar がメールボックスを自動で見つけます"
-  allFailed: メールを確認できませんでした
-  allSignedOut: ログインしていません
-  failedIn:
-    other: $1件のメールボックスでエラー
-  signedOutIn:
-    other: $1件のメールボックスで未ログイン
 
 options:
   title: Pulsar — 設定

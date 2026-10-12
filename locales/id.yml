@@ -28,14 +28,7 @@ popup:
   undo: "Urungkan"
 
 badge:
-  noNew: tidak ada email baru
   empty: "Masuk ke email Anda di browser ini, dan Pulsar akan menemukan kotak surat Anda sendiri"
-  allFailed: gagal memeriksa email
-  allSignedOut: belum login
-  failedIn:
-    other: error di $1 kotak surat
-  signedOutIn:
-    other: belum login di $1 kotak surat
 
 options:
   title: Pulsar — Setelan

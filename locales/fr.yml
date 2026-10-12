@@ -32,18 +32,7 @@ popup:
   undo: "Annuler"
 
 badge:
-  noNew: aucun nouvel e-mail
   empty: "Connectez-vous à votre messagerie dans ce navigateur : Pulsar trouvera vos boîtes tout seul"
-  allFailed: impossible de vérifier les e-mails
-  allSignedOut: non connecté
-  failedIn:
-    one: erreur dans $1 boîte
-    many: erreurs dans $1 boîtes
-    other: erreurs dans $1 boîtes
-  signedOutIn:
-    one: non connecté à $1 boîte
-    many: non connecté à $1 boîtes
-    other: non connecté à $1 boîtes
 
 options:
   title: Pulsar — Paramètres

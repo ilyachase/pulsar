@@ -32,18 +32,7 @@ popup:
   undo: "Desfazer"
 
 badge:
-  noNew: nenhum e-mail novo
   empty: "Entre no seu e-mail neste navegador e o Pulsar encontrará suas caixas sozinho"
-  allFailed: não foi possível verificar os e-mails
-  allSignedOut: login não feito
-  failedIn:
-    one: erro em $1 caixa
-    many: erros em $1 caixas
-    other: erros em $1 caixas
-  signedOutIn:
-    one: sem login em $1 caixa
-    many: sem login em $1 caixas
-    other: sem login em $1 caixas
 
 options:
   title: Pulsar — Configurações

@@ -33,16 +33,7 @@ popup:
   undo: "Undo"
 
 badge:
-  noNew: no new mail
   empty: "Sign in to your mail in this browser, and Pulsar will find your mailboxes"
-  allFailed: couldn't check mail
-  allSignedOut: not signed in
-  failedIn:
-    one: error in $1 mailbox
-    other: errors in $1 mailboxes
-  signedOutIn:
-    one: signed out of $1 mailbox
-    other: signed out of $1 mailboxes
 
 options:
   title: Pulsar — Settings

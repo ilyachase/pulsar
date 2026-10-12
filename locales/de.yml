@@ -30,16 +30,7 @@ popup:
   undo: "Rückgängig"
 
 badge:
-  noNew: keine neuen E-Mails
   empty: "Melden Sie sich in diesem Browser bei Ihrem E-Mail-Dienst an – Pulsar findet Ihre Postfächer selbst"
-  allFailed: E-Mails konnten nicht geprüft werden
-  allSignedOut: nicht angemeldet
-  failedIn:
-    one: Fehler in $1 Postfach
-    other: Fehler in $1 Postfächern
-  signedOutIn:
-    one: nicht angemeldet in $1 Postfach
-    other: nicht angemeldet in $1 Postfächern
 
 options:
   title: Pulsar — Einstellungen

@@ -32,18 +32,7 @@ popup:
   undo: "Deshacer"
 
 badge:
-  noNew: no hay correo nuevo
   empty: "Inicia sesión en tu correo en este navegador y Pulsar encontrará tus buzones"
-  allFailed: no se pudo comprobar el correo
-  allSignedOut: no has iniciado sesión
-  failedIn:
-    one: error en $1 buzón
-    many: errores en $1 buzones
-    other: errores en $1 buzones
-  signedOutIn:
-    one: sin sesión en $1 buzón
-    many: sin sesión en $1 buzones
-    other: sin sesión en $1 buzones
 
 options:
   title: Pulsar — Configuración
