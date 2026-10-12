@@ -57,6 +57,13 @@ options:
   pollMin: En az $1 saniye
   pollMax: En fazla $1 saniye
   notify: Yeni e-postaları bildir
+  order: "Posta kutularının sırası"
+  moveUp: "Yukarı taşı"
+  moveDown: "Aşağı taşı"
+  messages: "Posta kutusu başına listelenen ileti"
+  messagesRange: "$1 ile $2 arası"
+  messagesRequired: "Bir ileti sayısı girin"
+  messagesInteger: "Yalnızca tam sayı"
   workmailPlaceholder: WorkMail web adresiniz
   connect: Bağlan
   disconnect: Bağlantıyı kes

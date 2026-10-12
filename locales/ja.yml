@@ -53,6 +53,13 @@ options:
   pollMin: $1秒以上にしてください
   pollMax: $1秒以下にしてください
   notify: 新着メールを通知
+  order: "メールボックスの順序"
+  moveUp: "上へ"
+  moveDown: "下へ"
+  messages: "メールボックスごとの表示件数"
+  messagesRange: "$1〜$2"
+  messagesRequired: "メッセージ数を入力してください"
+  messagesInteger: "整数のみ"
   workmailPlaceholder: WorkMail のウェブアドレス
   connect: 接続
   disconnect: 切断

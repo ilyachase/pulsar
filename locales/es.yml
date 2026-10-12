@@ -61,6 +61,13 @@ options:
   pollMin: Mínimo $1 segundos
   pollMax: Máximo $1 segundos
   notify: Avisar de correo nuevo
+  order: "Orden de los buzones"
+  moveUp: "Subir"
+  moveDown: "Bajar"
+  messages: "Mensajes en la lista de cada buzón"
+  messagesRange: "De $1 a $2"
+  messagesRequired: "Indica un número de mensajes"
+  messagesInteger: "Solo números enteros"
   workmailPlaceholder: Dirección web de tu WorkMail
   connect: Conectar
   disconnect: Desconectar

@@ -83,13 +83,18 @@ h1 {
   font-size: 1.15em;
 }
 
-#poll {
+.number {
   width: 140px;
   flex: none;
   /* "required" is for validation only; the row label already names the field */
   --wa-form-control-required-content: "";
 }
-#poll::part(input) {
+/* The row's <label for> names the field; the component's own label is empty but still took a line
+   (because of "required") and pushed the box below the row's center */
+.number::part(form-control-label) {
+  display: none;
+}
+.number::part(input) {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-weight: var(--wa-font-weight-semibold);
@@ -101,18 +106,18 @@ h1 {
  * Errors show when the component says so — :state(user-invalid), i.e. after the user has typed
  * and left the field — in danger color plus an icon, not color alone (WCAG 1.4.1).
  */
-#poll-error {
+.field-error {
   display: none;
   color: var(--wa-color-danger-on-quiet);
   font-weight: var(--wa-font-weight-semibold);
 }
-#poll:state(user-invalid) {
+.number:state(user-invalid) {
   --wa-form-control-border-color: var(--wa-color-danger-border-loud);
 }
-.label:has(~ #poll:state(user-invalid)) #poll-error {
+.label:has(~ .number:state(user-invalid)) .field-error {
   display: inline-flex;
 }
-.label:has(~ #poll:state(user-invalid)) #poll-hint {
+.label:has(~ .number:state(user-invalid)) .field-hint {
   display: none;
 }
 
@@ -144,7 +149,7 @@ h1 {
   font-weight: var(--wa-font-weight-semibold);
 }
 
-.disconnected-head {
+.card-title {
   display: block;
   margin-bottom: var(--wa-space-s);
 }
@@ -168,4 +173,44 @@ h1 {
     flex-direction: row;
     align-items: center;
   }
+}
+
+/* ---------- Mailbox order ---------- */
+.order {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.order li {
+  display: flex;
+  align-items: center;
+  gap: var(--wa-space-s);
+  padding: var(--wa-space-2xs) 0;
+  border-radius: var(--wa-border-radius-m);
+  background: var(--wa-color-surface-default);
+}
+.order li + li {
+  border-top: var(--wa-border-width-s) solid var(--wa-color-surface-border);
+}
+.order .grip {
+  flex: none;
+  color: var(--wa-color-text-quiet);
+  cursor: grab;
+}
+.order li.dragging {
+  opacity: 0.5;
+}
+.order .provider {
+  font-size: 18px;
+  flex: none;
+}
+.order .addr {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.order wa-button {
+  flex: none;
 }

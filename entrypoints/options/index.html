@@ -36,14 +36,25 @@
         <div class="row">
           <div class="label">
             <label class="name" for="poll" data-i18n="options.poll"></label>
-            <span id="poll-hint" class="desc"></span>
-            <span id="poll-error" class="desc error" aria-live="polite">
+            <span id="poll-hint" class="desc field-hint"></span>
+            <span class="desc field-error" aria-live="polite">
               <wa-icon name="circle-alert"></wa-icon><span id="poll-error-text"></span>
             </span>
           </div>
-          <wa-number-input id="poll" required step="1" without-steppers size="s">
+          <wa-number-input id="poll" class="number" required step="1" without-steppers size="s">
             <span slot="end" class="unit" data-i18n="options.pollUnit"></span>
           </wa-number-input>
+        </div>
+        <wa-divider></wa-divider>
+        <div class="row">
+          <div class="label">
+            <label class="name" for="messages" data-i18n="options.messages"></label>
+            <span id="messages-hint" class="desc field-hint"></span>
+            <span class="desc field-error" aria-live="polite">
+              <wa-icon name="circle-alert"></wa-icon><span id="messages-error-text"></span>
+            </span>
+          </div>
+          <wa-number-input id="messages" class="number" required step="1" without-steppers size="s"></wa-number-input>
         </div>
         <wa-divider></wa-divider>
         <div class="row">
@@ -64,9 +75,15 @@
         </div>
       </wa-card>
 
+      <!-- Drag to reorder (or Move up/down by keyboard); shown when there are two mailboxes or more -->
+      <wa-card id="order-card" hidden>
+        <span class="name card-title" data-i18n="options.order"></span>
+        <ol id="order-list" class="order"></ol>
+      </wa-card>
+
       <!-- Mailboxes disconnected from the popup; shown only when there are any -->
       <wa-card id="disconnected-card" hidden>
-        <span class="name disconnected-head" data-i18n="options.disconnectedTitle"></span>
+        <span class="name card-title" data-i18n="options.disconnectedTitle"></span>
         <div id="disconnected-list"></div>
       </wa-card>
 

@@ -53,6 +53,13 @@ options:
   pollMin: Minimal $1 detik
   pollMax: Maksimal $1 detik
   notify: Beri tahu email baru
+  order: "Urutan kotak surat"
+  moveUp: "Naikkan"
+  moveDown: "Turunkan"
+  messages: "Pesan yang ditampilkan per kotak surat"
+  messagesRange: "Dari $1 sampai $2"
+  messagesRequired: "Masukkan jumlah pesan"
+  messagesInteger: "Hanya bilangan bulat"
   workmailPlaceholder: Alamat web WorkMail Anda
   connect: Hubungkan
   disconnect: Putuskan

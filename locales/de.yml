@@ -57,6 +57,13 @@ options:
   pollMin: Mindestens $1 Sekunden
   pollMax: Höchstens $1 Sekunden
   notify: Über neue E-Mails benachrichtigen
+  order: "Reihenfolge der Postfächer"
+  moveUp: "Nach oben"
+  moveDown: "Nach unten"
+  messages: "Nachrichten pro Postfach in der Liste"
+  messagesRange: "Von $1 bis $2"
+  messagesRequired: "Geben Sie eine Anzahl von Nachrichten ein"
+  messagesInteger: "Nur ganze Zahlen"
   workmailPlaceholder: Webadresse Ihres WorkMail
   connect: Verbinden
   disconnect: Trennen

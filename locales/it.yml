@@ -61,6 +61,13 @@ options:
   pollMin: Minimo $1 secondi
   pollMax: Massimo $1 secondi
   notify: Notifica le nuove email
+  order: "Ordine delle caselle"
+  moveUp: "Sposta su"
+  moveDown: "Sposta giù"
+  messages: "Messaggi in elenco per casella"
+  messagesRange: "Da $1 a $2"
+  messagesRequired: "Indica un numero di messaggi"
+  messagesInteger: "Solo numeri interi"
   workmailPlaceholder: Indirizzo web del tuo WorkMail
   connect: Collega
   disconnect: Scollega

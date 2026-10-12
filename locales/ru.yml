@@ -66,6 +66,13 @@ options:
   pollMin: Минимум $1 секунд
   pollMax: Максимум $1 секунд
   notify: Уведомлять о новых письмах
+  order: "Порядок ящиков"
+  moveUp: "Выше"
+  moveDown: "Ниже"
+  messages: "Писем в списке у ящика"
+  messagesRange: "От $1 до $2"
+  messagesRequired: "Укажите число писем"
+  messagesInteger: "Только целое число"
   workmailPlaceholder: Ссылка на вашу почту WorkMail
   connect: Подключить
   disconnect: Отключить

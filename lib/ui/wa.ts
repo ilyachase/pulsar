@@ -16,6 +16,7 @@ import '@awesome.me/webawesome/dist/translations/pt.js';
 import '@awesome.me/webawesome/dist/translations/ru.js';
 import '@awesome.me/webawesome/dist/translations/tr.js';
 import { registerIconLibrary } from '@awesome.me/webawesome/dist/components/icon/library.js';
+import type { Account } from '../providers/types';
 
 const outline = (body: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
@@ -42,6 +43,12 @@ const ICONS: Record<string, string> = {
   unplug: outline(
     '<path d="m19 5 3-3"/><path d="m2 22 3-3"/><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"/>',
   ),
+  // Lucide "grip-vertical", "chevron-up", "chevron-down": reordering mailboxes in the settings
+  grip: outline(
+    '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>',
+  ),
+  'chevron-up': outline('<path d="m18 15-6-6-6 6"/>'),
+  'chevron-down': outline('<path d="m6 9 6 6 6-6"/>'),
   'log-in': outline(
     '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
   ),
@@ -70,3 +77,9 @@ registerIconLibrary('default', {
     return `data:image/svg+xml,${encodeURIComponent(svg ?? '<svg xmlns="http://www.w3.org/2000/svg"/>')}`;
   },
 });
+
+/** Yandex 360 (organization) mailboxes live on mail.360.yandex.ru and get their own mark */
+export function providerIcon(a: Pick<Account, 'provider' | 'inboxUrl'>): string {
+  if (a.provider === 'yandex' && a.inboxUrl.includes('360.yandex')) return 'yandex360';
+  return a.provider;
+}

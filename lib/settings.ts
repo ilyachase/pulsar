@@ -1,4 +1,5 @@
 import { i18n, locale } from './i18n';
+import { MAX_MESSAGES } from './providers/types';
 
 /** Chrome doesn't fire alarms more often than every 30 seconds */
 export const MIN_POLL_SECONDS = 30;
@@ -40,5 +41,34 @@ export function pollError(raw: string): string | null {
   if (!Number.isInteger(n)) return i18n.t('options.pollInteger');
   if (n < MIN_POLL_SECONDS) return i18n.t('options.pollMin', count(MIN_POLL_SECONDS));
   if (n > MAX_POLL_SECONDS) return i18n.t('options.pollMax', count(MAX_POLL_SECONDS));
+  return null;
+}
+
+/** Messages listed per mailbox in the popup; 0 leaves just the header with the count */
+export const MIN_SHOWN_MESSAGES = 0;
+export const MAX_SHOWN_MESSAGES = MAX_MESSAGES;
+export const DEFAULT_SHOWN_MESSAGES = MAX_SHOWN_MESSAGES;
+
+/** Whole numbers within [MIN, MAX]; anything unparsable gives the default */
+export function clampShownMessages(value: unknown): number {
+  const n = Math.round(Number(value));
+  if (value === null || value === '' || !Number.isFinite(n)) return DEFAULT_SHOWN_MESSAGES;
+  return Math.min(MAX_SHOWN_MESSAGES, Math.max(MIN_SHOWN_MESSAGES, n));
+}
+
+/** The allowed range, shown before the user errs and as the error for out-of-range numbers */
+export const shownMessagesRange = (): string =>
+  i18n.t('options.messagesRange', [
+    new Intl.NumberFormat(locale).format(MIN_SHOWN_MESSAGES),
+    new Intl.NumberFormat(locale).format(MAX_SHOWN_MESSAGES),
+  ]);
+
+/** The error text for a typed number of messages, or null when it's acceptable */
+export function shownMessagesError(raw: string): string | null {
+  const text = raw.trim();
+  const n = Number(text);
+  if (text === '' || !Number.isFinite(n)) return i18n.t('options.messagesRequired');
+  if (!Number.isInteger(n)) return i18n.t('options.messagesInteger');
+  if (n < MIN_SHOWN_MESSAGES || n > MAX_SHOWN_MESSAGES) return shownMessagesRange();
   return null;
 }

@@ -1,4 +1,4 @@
-import '@/lib/ui/wa';
+import { providerIcon } from '@/lib/ui/wa';
 import '@awesome.me/webawesome/dist/components/avatar/avatar.js';
 import '@awesome.me/webawesome/dist/components/badge/badge.js';
 import '@awesome.me/webawesome/dist/components/button/button.js';
@@ -10,7 +10,8 @@ import { addDisconnected, removeDisconnected, toDisconnected } from '@/lib/disco
 import { i18n, localizePage, unreadParts } from '@/lib/i18n';
 import type { Account, Message, State } from '@/lib/providers';
 import { isSignInPrompt } from '@/lib/providers/types';
-import { disconnectedItem, workmailUrlItem } from '@/lib/settings-store';
+import { clampShownMessages, DEFAULT_SHOWN_MESSAGES } from '@/lib/settings';
+import { disconnectedItem, shownMessagesItem, workmailUrlItem } from '@/lib/settings-store';
 import { STATE_KEY } from '@/lib/state';
 import { initTheme } from '@/lib/ui/theme';
 import { avatarHue, cleanSnippet, formatTime } from './format';
@@ -49,12 +50,6 @@ function icon(name: string, attrs: Record<string, string> = {}): HTMLElement {
   return wa('wa-icon', { name, ...attrs });
 }
 
-/** Yandex 360 (organization) mailboxes live on mail.360.yandex.ru and get their own mark */
-function providerIcon(a: Account): string {
-  if (a.provider === 'yandex' && a.inboxUrl.includes('360.yandex')) return 'yandex360';
-  return a.provider;
-}
-
 function open(url: string): void {
   void browser.tabs.create({ url });
   window.close();
@@ -68,6 +63,9 @@ async function openMessage(accountId: string, m: Message): Promise<void> {
     open(m.url);
   }
 }
+
+/** Messages listed per mailbox (a display setting: Pulsar still tracks all of them for notifications) */
+let shownMessages = DEFAULT_SHOWN_MESSAGES;
 
 function renderMessage(accountId: string, m: Message): HTMLButtonElement {
   const row = el('button', 'row');
@@ -167,7 +165,7 @@ function renderAccount(a: Account, index: number): HTMLElement {
     count.textContent = String(a.unreadCount);
   }
   card.append(renderHead(a, index, count));
-  for (const m of a.messages) card.append(renderMessage(a.id, m));
+  for (const m of a.messages.slice(0, shownMessages)) card.append(renderMessage(a.id, m));
   return card;
 }
 
@@ -293,8 +291,16 @@ browser.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STATE_KEY]) render(changes[STATE_KEY].newValue as State);
 });
 
-// Render the cache instantly (the only animated paint), then quietly fetch fresh data
-void browser.storage.local.get(STATE_KEY).then((cached) => {
-  render(cached[STATE_KEY] as State | undefined, true);
-  void refresh(true);
+shownMessagesItem.watch((n) => {
+  shownMessages = clampShownMessages(n);
+  rerender();
 });
+
+// Render the cache instantly (the only animated paint), then quietly fetch fresh data
+void Promise.all([browser.storage.local.get(STATE_KEY), shownMessagesItem.getValue()]).then(
+  ([cached, n]) => {
+    shownMessages = clampShownMessages(n);
+    render(cached[STATE_KEY] as State | undefined, true);
+    void refresh(true);
+  },
+);

@@ -8,10 +8,12 @@ import {
   notificationId,
   parseNotificationId,
 } from '@/lib/notify';
+import { sortAccounts } from '@/lib/order';
 import { fetchAllAccounts, type State } from '@/lib/providers';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import { clampPollSeconds } from '@/lib/settings';
 import {
+  accountOrderItem,
   disconnectedItem,
   notifyItem,
   pollSecondsItem,
@@ -128,7 +130,10 @@ function poll(withNotifications = true): Promise<State> {
       const fetched = await fetchAllAccounts(await disconnectedItem.getValue());
       // A mailbox disconnected while this poll was running must not come back
       const current = withoutDisconnected(fetched, await disconnectedItem.getValue());
-      const accounts = hideOpenedSince(current, opened, startedAt);
+      const accounts = sortAccounts(
+        hideOpenedSince(current, opened, startedAt),
+        await accountOrderItem.getValue(),
+      );
       // Clicks before this poll started are already reflected by the mail service (or not — fine)
       for (const [key, at] of opened) if (at < startedAt) opened.delete(key);
       const state: State = { accounts, updatedAt: Date.now() };
@@ -191,6 +196,11 @@ export default defineBackground(() => {
   pollSecondsItem.watch(() => void ensureAlarm());
   workmailUrlItem.watch(() => void installHeaderRules().then(() => poll(false)));
   disconnectedItem.watch((list) => void onDisconnectedChanged(list));
+  // Reordering needs no new check: the mail already shown is just rearranged
+  accountOrderItem.watch(async (order) => {
+    const current = await readState();
+    if (current) await publish({ ...current, accounts: sortAccounts(current.accounts, order) });
+  });
 
   const start = async () => {
     await installHeaderRules();

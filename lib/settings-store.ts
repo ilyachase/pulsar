@@ -1,6 +1,6 @@
 import { storage } from 'wxt/utils/storage';
 import type { Disconnected } from './disconnected';
-import { DEFAULT_POLL_SECONDS } from './settings';
+import { DEFAULT_POLL_SECONDS, DEFAULT_SHOWN_MESSAGES } from './settings';
 
 /**
  * One storage item per setting: each field reads and writes only its own value, so settings
@@ -8,6 +8,10 @@ import { DEFAULT_POLL_SECONDS } from './settings';
  */
 export const pollSecondsItem = storage.defineItem<number>('local:pollSeconds', {
   fallback: DEFAULT_POLL_SECONDS,
+});
+
+export const shownMessagesItem = storage.defineItem<number>('local:shownMessages', {
+  fallback: DEFAULT_SHOWN_MESSAGES,
 });
 
 export const notifyItem = storage.defineItem<boolean>('local:notify', { fallback: true });
@@ -19,5 +23,10 @@ export const workmailUrlItem = storage.defineItem<string | null>('local:workmail
 
 /** Mailboxes and services Pulsar doesn't check (disconnected from the popup) */
 export const disconnectedItem = storage.defineItem<Disconnected[]>('local:disconnected', {
+  fallback: [],
+});
+
+/** Mailbox ids in the order the popup lists them (set on the settings page) */
+export const accountOrderItem = storage.defineItem<string[]>('local:accountOrder', {
   fallback: [],
 });

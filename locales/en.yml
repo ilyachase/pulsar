@@ -60,6 +60,13 @@ options:
   pollMin: At least $1 seconds
   pollMax: At most $1 seconds
   notify: Notify about new mail
+  order: "Mailbox order"
+  moveUp: "Move up"
+  moveDown: "Move down"
+  messages: "Messages listed per mailbox"
+  messagesRange: "From $1 to $2"
+  messagesRequired: "Enter a number of messages"
+  messagesInteger: "Whole numbers only"
   workmailPlaceholder: Your WorkMail web address
   connect: Connect
   disconnect: Disconnect
