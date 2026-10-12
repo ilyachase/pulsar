@@ -1,0 +1,67 @@
+# Publishes a GitHub release with the packed extension whenever main gets a version
+# (package.json) that has no release yet: bump the version, push, and the release appears.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find the version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if gh release view "v$version" > /dev/null 2>&1; then
+            echo "Release v$version already exists, nothing to do"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.version.outputs.new == 'true'
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        if: steps.version.outputs.new == 'true'
+        run: npm ci
+
+      - name: Check
+        if: steps.version.outputs.new == 'true'
+        run: |
+          npm run lint
+          npm run compile
+          npm test
+
+      - name: Pack
+        if: steps.version.outputs.new == 'true'
+        run: npx wxt zip
+
+      - name: Publish the release
+        if: steps.version.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v$VERSION" ".output/pulsar-$VERSION-chrome.zip" \
+            --title "Pulsar $VERSION" \
+            --generate-notes \
+            --target "$GITHUB_SHA"
