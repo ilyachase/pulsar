@@ -53,7 +53,7 @@ export function parseGmailFeed(xml: string, index: number): Account | null {
       subject: text(e.title) || i18n.t('noSubject'),
       snippet: text(e.summary),
       date: Date.parse(text(e.issued) || text(e.modified)) || 0,
-      url: href || inboxUrl(index),
+      url: messageUrl(href, index),
     };
   });
 
@@ -71,6 +71,20 @@ export function parseGmailFeed(xml: string, index: number): Account | null {
 
 function inboxUrl(index: number): string {
   return `https://mail.google.com/mail/u/${index}/#inbox`;
+}
+
+/**
+ * The feed's own link (?account_id=…&message_id=…&view=conv&extsrc=atom) is a legacy format
+ * Gmail now answers with "403 Forbidden", so we open the conversation by its hex id instead.
+ */
+function messageUrl(href: string, index: number): string {
+  let id: string | null = null;
+  try {
+    id = new URL(href).searchParams.get('message_id');
+  } catch {
+    // no or malformed link
+  }
+  return id && /^[0-9a-f]+$/i.test(id) ? `${inboxUrl(index)}/${id}` : inboxUrl(index);
 }
 
 export async function fetchGmailAccounts(fetchFn: typeof fetch = fetch): Promise<Account[]> {

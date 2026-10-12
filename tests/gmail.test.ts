@@ -21,7 +21,7 @@ describe('parseGmailFeed', () => {
       subject: 'Встреча в четверг & планы',
       snippet: "Привет! Давай перенесём на 15:00, it's ok?",
       date: Date.parse('2026-10-10T09:41:00Z'),
-      url: 'https://mail.google.com/mail/u/0?account_id=test.user@gmail.com&message_id=19a1b2c3d4e5f607&view=conv&extsrc=atom',
+      url: 'https://mail.google.com/mail/u/0/#inbox/19a1b2c3d4e5f607',
     });
   });
 
@@ -29,6 +29,12 @@ describe('parseGmailFeed', () => {
     const m = parseGmailFeed(feed, 0)?.messages[1];
     expect(m?.from).toBe('noreply@example.com');
     expect(m?.subject).toBe('(без темы)');
+  });
+
+  it('links messages of other accounts to their /u/N index', () => {
+    expect(parseGmailFeed(feed, 1)?.messages[1]?.url).toBe(
+      'https://mail.google.com/mail/u/1/#inbox/19a1b2c3d4e5f608',
+    );
   });
 
   it('returns null for a non-feed page', () => {
