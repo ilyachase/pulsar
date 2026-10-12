@@ -1,10 +1,13 @@
 # Publishes a GitHub release with the packed extension whenever main gets a version
 # (package.json) that has no release yet: bump the version, push, and the release appears.
+# A push without a version bump runs the workflow but publishes nothing.
 name: Release
 
 on:
   push:
     branches: [main]
+    # Docs-only pushes can't change the extension: skip the run entirely
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   workflow_dispatch:
 
 permissions:
