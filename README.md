@@ -2,6 +2,8 @@
 
 A Chrome extension that shows unread emails from **Gmail** and **Yandex Mail**. The icon badge shows the unread count, the popup lists the emails grouped by account, and clicking an email opens it in a new tab.
 
+![Pulsar popup with unread emails from two Gmail inboxes and a Yandex inbox](docs/popup.png)
+
 It uses the browser session you're already signed in with: no passwords or OAuth. Mail is checked every 30 seconds.
 
 ## Install
