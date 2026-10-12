@@ -17,15 +17,21 @@ popup:
   refresh: Şimdi kontrol et
   checking: E-postalar kontrol ediliyor…
   noNew: Yeni e-posta yok
+  empty: "Bu tarayıcıda e-postanıza giriş yapın, Pulsar posta kutularınızı kendisi bulur"
   openInbox: Gelen kutusunu aç
   signIn: Oturum aç
   retry: Tekrar dene
   notSignedIn: Oturum açılmadı
   checkFailed: "Kontrol edilemedi: $1"
   unknownError: bilinmeyen hata
+  disconnect: "Bağlantıyı kes"
+  disconnectHint: "Pulsar bu posta kutusunu artık denetlemeyecek. E-postada oturumunuz açık kalır"
+  disconnected: "Bağlantı kesildi: $1"
+  undo: "Geri al"
 
 badge:
   noNew: yeni e-posta yok
+  empty: "Bu tarayıcıda e-postanıza giriş yapın, Pulsar posta kutularınızı kendisi bulur"
   allFailed: e-postalar kontrol edilemedi
   allSignedOut: oturum açılmadı
   failedIn:
@@ -56,6 +62,7 @@ options:
   disconnect: Bağlantıyı kes
   workmailBadUrl: "https://webmail.mail.<bölge>.awsapps.com/workmail/ biçiminde bir bağlantı girin"
   workmailDenied: Chrome posta sitesine erişim izni vermedi
+  disconnectedTitle: "Bağlantısı kesilen posta kutuları"
 
 yandex:
   name: Yandex Mail

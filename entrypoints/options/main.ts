@@ -8,6 +8,7 @@ import '@awesome.me/webawesome/dist/components/switch/switch.js';
 import '@awesome.me/webawesome/dist/components/divider/divider.js';
 import '@awesome.me/webawesome/dist/components/input/input.js';
 import '@awesome.me/webawesome/dist/components/button/button.js';
+import { type Disconnected, removeDisconnected } from '@/lib/disconnected';
 import { i18n, localizePage } from '@/lib/i18n';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import {
@@ -17,7 +18,12 @@ import {
   MIN_POLL_SECONDS,
   pollError,
 } from '@/lib/settings';
-import { notifyItem, pollSecondsItem, workmailUrlItem } from '@/lib/settings-store';
+import {
+  disconnectedItem,
+  notifyItem,
+  pollSecondsItem,
+  workmailUrlItem,
+} from '@/lib/settings-store';
 import {
   getThemeMode,
   initTheme,
@@ -139,6 +145,40 @@ workmailDisconnect.addEventListener('click', async () => {
   workmailInput.value = '';
   renderWorkmail(null);
 });
+
+// Disconnected mailboxes: Pulsar skips them until the user connects them back here
+const disconnectedCard = document.getElementById('disconnected-card') as HTMLElement;
+const disconnectedList = document.getElementById('disconnected-list') as HTMLElement;
+
+function renderDisconnected(list: Disconnected[]): void {
+  disconnectedCard.hidden = list.length === 0;
+  disconnectedList.replaceChildren(
+    ...list.map((d) => {
+      const row = document.createElement('div');
+      row.className = 'row mailbox';
+      const icon = document.createElement('wa-icon');
+      icon.setAttribute('name', d.provider);
+      icon.className = 'provider';
+      const addr = document.createElement('span');
+      addr.className = 'addr';
+      addr.textContent = d.label;
+      const connect = document.createElement('wa-button');
+      connect.setAttribute('size', 's');
+      connect.setAttribute('appearance', 'outlined');
+      connect.textContent = i18n.t('options.connect');
+      connect.addEventListener('click', async () => {
+        await disconnectedItem.setValue(
+          removeDisconnected(await disconnectedItem.getValue(), d.key),
+        );
+      });
+      row.append(icon, addr, connect);
+      return row;
+    }),
+  );
+}
+
+void disconnectedItem.getValue().then(renderDisconnected);
+disconnectedItem.watch(renderDisconnected);
 
 (document.getElementById('version') as HTMLElement).textContent =
   `Pulsar ${browser.runtime.getManifest().version}`;

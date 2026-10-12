@@ -15,15 +15,21 @@ popup:
   refresh: Periksa sekarang
   checking: Memeriksa email…
   noNew: Tidak ada email baru
+  empty: "Masuk ke email Anda di browser ini, dan Pulsar akan menemukan kotak surat Anda sendiri"
   openInbox: Buka kotak masuk
   signIn: Login
   retry: Coba lagi
   notSignedIn: Belum login
   checkFailed: "Gagal memeriksa: $1"
   unknownError: error tidak dikenal
+  disconnect: "Putuskan"
+  disconnectHint: "Pulsar tidak akan memeriksa kotak surat ini lagi. Anda tetap masuk ke email"
+  disconnected: "Diputuskan: $1"
+  undo: "Urungkan"
 
 badge:
   noNew: tidak ada email baru
+  empty: "Masuk ke email Anda di browser ini, dan Pulsar akan menemukan kotak surat Anda sendiri"
   allFailed: gagal memeriksa email
   allSignedOut: belum login
   failedIn:
@@ -52,6 +58,7 @@ options:
   disconnect: Putuskan
   workmailBadUrl: "Masukkan link seperti https://webmail.mail.<region>.awsapps.com/workmail/"
   workmailDenied: Chrome tidak memberi akses ke situs email
+  disconnectedTitle: "Kotak surat yang diputuskan"
 
 yandex:
   name: Yandex Mail

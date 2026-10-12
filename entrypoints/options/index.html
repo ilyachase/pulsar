@@ -64,6 +64,12 @@
         </div>
       </wa-card>
 
+      <!-- Mailboxes disconnected from the popup; shown only when there are any -->
+      <wa-card id="disconnected-card" hidden>
+        <span class="name disconnected-head" data-i18n="options.disconnectedTitle"></span>
+        <div id="disconnected-list"></div>
+      </wa-card>
+
       <footer id="version" class="foot"></footer>
     </main>
     <script type="module" src="./main.ts"></script>

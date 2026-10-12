@@ -19,15 +19,21 @@ popup:
   refresh: Vérifier maintenant
   checking: Vérification des e-mails…
   noNew: Aucun nouvel e-mail
+  empty: "Connectez-vous à votre messagerie dans ce navigateur : Pulsar trouvera vos boîtes tout seul"
   openInbox: Ouvrir la boîte
   signIn: Se connecter
   retry: Réessayer
   notSignedIn: Non connecté
   checkFailed: "Échec de la vérification : $1"
   unknownError: erreur inconnue
+  disconnect: "Déconnecter"
+  disconnectHint: "Pulsar ne vérifiera plus cette boîte. Vous restez connecté à votre messagerie"
+  disconnected: "Déconnecté : $1"
+  undo: "Annuler"
 
 badge:
   noNew: aucun nouvel e-mail
+  empty: "Connectez-vous à votre messagerie dans ce navigateur : Pulsar trouvera vos boîtes tout seul"
   allFailed: impossible de vérifier les e-mails
   allSignedOut: non connecté
   failedIn:
@@ -60,6 +66,7 @@ options:
   disconnect: Déconnecter
   workmailBadUrl: "Il faut un lien du type https://webmail.mail.<région>.awsapps.com/workmail/"
   workmailDenied: Chrome n’a pas accordé l’accès au site de la messagerie
+  disconnectedTitle: "Boîtes déconnectées"
 
 yandex:
   name: Yandex Mail

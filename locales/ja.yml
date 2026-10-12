@@ -15,15 +15,21 @@ popup:
   refresh: 今すぐ確認
   checking: メールを確認しています…
   noNew: 新着メールはありません
+  empty: "このブラウザでメールにログインすると、Pulsar がメールボックスを自動で見つけます"
   openInbox: 受信トレイを開く
   signIn: ログイン
   retry: 再試行
   notSignedIn: ログインしていません
   checkFailed: "確認できませんでした: $1"
   unknownError: 不明なエラー
+  disconnect: "切断"
+  disconnectHint: "Pulsar はこのメールボックスを確認しなくなります。メールからはログアウトしません"
+  disconnected: "切断済み: $1"
+  undo: "元に戻す"
 
 badge:
   noNew: 新着メールなし
+  empty: "このブラウザでメールにログインすると、Pulsar がメールボックスを自動で見つけます"
   allFailed: メールを確認できませんでした
   allSignedOut: ログインしていません
   failedIn:
@@ -52,6 +58,7 @@ options:
   disconnect: 切断
   workmailBadUrl: "https://webmail.mail.<リージョン>.awsapps.com/workmail/ の形式のリンクを入力してください"
   workmailDenied: Chrome がメールサイトへのアクセスを許可しませんでした
+  disconnectedTitle: "切断したメールボックス"
 
 yandex:
   name: Yandex Mail

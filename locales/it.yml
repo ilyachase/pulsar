@@ -19,15 +19,21 @@ popup:
   refresh: Controlla ora
   checking: Controllo della posta…
   noNew: Nessuna nuova email
+  empty: "Accedi alla tua posta in questo browser e Pulsar troverà da solo le tue caselle"
   openInbox: Apri casella
   signIn: Accedi
   retry: Riprova
   notSignedIn: Accesso non effettuato
   checkFailed: "Impossibile controllare: $1"
   unknownError: errore sconosciuto
+  disconnect: "Scollega"
+  disconnectHint: "Pulsar smetterà di controllare questa casella. Resti connesso alla posta"
+  disconnected: "Scollegato: $1"
+  undo: "Annulla"
 
 badge:
   noNew: nessuna nuova email
+  empty: "Accedi alla tua posta in questo browser e Pulsar troverà da solo le tue caselle"
   allFailed: impossibile controllare la posta
   allSignedOut: accesso non effettuato
   failedIn:
@@ -60,6 +66,7 @@ options:
   disconnect: Scollega
   workmailBadUrl: "Serve un link come https://webmail.mail.<regione>.awsapps.com/workmail/"
   workmailDenied: Chrome non ha concesso l'accesso al sito della posta
+  disconnectedTitle: "Caselle scollegate"
 
 yandex:
   name: Yandex Mail

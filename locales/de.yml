@@ -17,15 +17,21 @@ popup:
   refresh: Jetzt prüfen
   checking: E-Mails werden geprüft…
   noNew: Keine neuen E-Mails
+  empty: "Melden Sie sich in diesem Browser bei Ihrem E-Mail-Dienst an – Pulsar findet Ihre Postfächer selbst"
   openInbox: Posteingang öffnen
   signIn: Anmelden
   retry: Erneut versuchen
   notSignedIn: Nicht angemeldet
   checkFailed: "Prüfung fehlgeschlagen: $1"
   unknownError: unbekannter Fehler
+  disconnect: "Trennen"
+  disconnectHint: "Pulsar prüft dieses Postfach nicht mehr. Sie bleiben beim E-Mail-Dienst angemeldet"
+  disconnected: "Getrennt: $1"
+  undo: "Rückgängig"
 
 badge:
   noNew: keine neuen E-Mails
+  empty: "Melden Sie sich in diesem Browser bei Ihrem E-Mail-Dienst an – Pulsar findet Ihre Postfächer selbst"
   allFailed: E-Mails konnten nicht geprüft werden
   allSignedOut: nicht angemeldet
   failedIn:
@@ -56,6 +62,7 @@ options:
   disconnect: Trennen
   workmailBadUrl: "Benötigt wird ein Link wie https://webmail.mail.<Region>.awsapps.com/workmail/"
   workmailDenied: Chrome hat keinen Zugriff auf die E-Mail-Website gewährt
+  disconnectedTitle: "Getrennte Postfächer"
 
 yandex:
   name: Yandex Mail

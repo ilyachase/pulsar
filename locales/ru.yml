@@ -22,15 +22,21 @@ popup:
   refresh: Проверить сейчас
   checking: Проверяю почту…
   noNew: Новых писем нет
+  empty: "Войдите в почту в этом браузере — Pulsar сам найдёт ваши ящики"
   openInbox: Открыть ящик
   signIn: Войти
   retry: Повторить
   notSignedIn: Не выполнен вход
   checkFailed: "Не удалось проверить: $1"
   unknownError: неизвестная ошибка
+  disconnect: "Отключить"
+  disconnectHint: "Pulsar перестанет проверять этот ящик. Из почты вы не выйдете"
+  disconnected: "Отключено: $1"
+  undo: "Вернуть"
 
 badge:
   noNew: новых писем нет
+  empty: "Войдите в почту в этом браузере — Pulsar сам найдёт ваши ящики"
   allFailed: не удалось проверить почту
   allSignedOut: не выполнен вход
   failedIn:
@@ -65,6 +71,7 @@ options:
   disconnect: Отключить
   workmailBadUrl: "Нужна ссылка вида https://webmail.mail.<регион>.awsapps.com/workmail/"
   workmailDenied: Chrome не выдал доступ к адресу почты
+  disconnectedTitle: "Отключённые ящики"
 
 yandex:
   name: Яндекс Почта

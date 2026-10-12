@@ -42,6 +42,13 @@ export function signedOut(provider: ProviderId, name: string, loginUrl: string):
   };
 }
 
+/**
+ * The provider's own "not signed in" card (no mailbox known). The popup doesn't list these: with many
+ * providers they would crowd out the real mailboxes. They only feed the empty state's sign-in links.
+ */
+export const isSignInPrompt = (a: Account): boolean =>
+  a.status === 'signed-out' && a.id === `${a.provider}:signed-out`;
+
 export function failed(
   provider: ProviderId,
   name: string,

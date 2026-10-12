@@ -1,5 +1,5 @@
 import { i18n, plural, unreadText } from './i18n';
-import type { Account } from './providers/types';
+import { type Account, isSignInPrompt } from './providers/types';
 
 export interface Badge {
   text: string;
@@ -24,7 +24,9 @@ function summary(accounts: Account[], unread: number): string {
   return parts.join(' · ');
 }
 
-export function computeBadge(accounts: Account[]): Badge {
+export function computeBadge(all: Account[]): Badge {
+  // Services the user never signed in to are not "signed-out mailboxes"
+  const accounts = all.filter((a) => !isSignInPrompt(a));
   const ok = accounts.filter((a) => a.status === 'ok');
   const errors = accounts.filter((a) => a.status === 'error');
   const unread = ok.reduce((sum, a) => sum + a.unreadCount, 0);

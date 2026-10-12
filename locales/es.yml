@@ -19,15 +19,21 @@ popup:
   refresh: Comprobar ahora
   checking: Comprobando el correo…
   noNew: No hay correo nuevo
+  empty: "Inicia sesión en tu correo en este navegador y Pulsar encontrará tus buzones"
   openInbox: Abrir bandeja
   signIn: Iniciar sesión
   retry: Reintentar
   notSignedIn: No has iniciado sesión
   checkFailed: "No se pudo comprobar: $1"
   unknownError: error desconocido
+  disconnect: "Desconectar"
+  disconnectHint: "Pulsar dejará de revisar este buzón. Tu sesión en el correo sigue abierta"
+  disconnected: "Desconectado: $1"
+  undo: "Deshacer"
 
 badge:
   noNew: no hay correo nuevo
+  empty: "Inicia sesión en tu correo en este navegador y Pulsar encontrará tus buzones"
   allFailed: no se pudo comprobar el correo
   allSignedOut: no has iniciado sesión
   failedIn:
@@ -60,6 +66,7 @@ options:
   disconnect: Desconectar
   workmailBadUrl: "Introduce un enlace como https://webmail.mail.<región>.awsapps.com/workmail/"
   workmailDenied: Chrome no concedió acceso al sitio del correo
+  disconnectedTitle: "Buzones desconectados"
 
 yandex:
   name: Yandex Mail

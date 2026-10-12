@@ -38,6 +38,10 @@ const ICONS: Record<string, string> = {
   ),
   moon: outline('<path d="M20.5 14.1A8.5 8.5 0 1 1 9.9 3.5a7 7 0 0 0 10.6 10.6z"/>'),
   'circle-alert': outline('<circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5M12 16.25v.25"/>'),
+  // Lucide "unplug": disconnecting a mailbox from Pulsar (not signing out of the mail)
+  unplug: outline(
+    '<path d="m19 5 3-3"/><path d="m2 22 3-3"/><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"/>',
+  ),
   'log-in': outline(
     '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>',
   ),

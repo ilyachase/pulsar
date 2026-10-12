@@ -1,4 +1,5 @@
 import { computeBadge } from '@/lib/badge';
+import { type Disconnected, withoutDisconnected } from '@/lib/disconnected';
 import { unreadText } from '@/lib/i18n';
 import {
   findNewMessages,
@@ -10,7 +11,12 @@ import {
 import { fetchAllAccounts, type State } from '@/lib/providers';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import { clampPollSeconds } from '@/lib/settings';
-import { notifyItem, pollSecondsItem, workmailUrlItem } from '@/lib/settings-store';
+import {
+  disconnectedItem,
+  notifyItem,
+  pollSecondsItem,
+  workmailUrlItem,
+} from '@/lib/settings-store';
 import { hideOpenedSince, markRead, openedKey, STATE_KEY } from '@/lib/state';
 
 const ALARM = 'poll';
@@ -119,8 +125,10 @@ function poll(withNotifications = true): Promise<State> {
     const startedAt = Date.now();
     try {
       const prev = await readState();
-      const fetched = await fetchAllAccounts();
-      const accounts = hideOpenedSince(fetched, opened, startedAt);
+      const fetched = await fetchAllAccounts(await disconnectedItem.getValue());
+      // A mailbox disconnected while this poll was running must not come back
+      const current = withoutDisconnected(fetched, await disconnectedItem.getValue());
+      const accounts = hideOpenedSince(current, opened, startedAt);
       // Clicks before this poll started are already reflected by the mail service (or not — fine)
       for (const [key, at] of opened) if (at < startedAt) opened.delete(key);
       const state: State = { accounts, updatedAt: Date.now() };
@@ -139,6 +147,15 @@ async function onOpened(accountId: string, messageId: string): Promise<void> {
   opened.set(openedKey(accountId, messageId), Date.now());
   const current = await readState();
   if (current) await publish(markRead(current, accountId, messageId));
+}
+
+/** Hides a disconnected mailbox at once, then checks again (a reconnected one reappears) */
+async function onDisconnectedChanged(list: Disconnected[]): Promise<void> {
+  const current = await readState();
+  if (current) await publish({ ...current, accounts: withoutDisconnected(current.accounts, list) });
+  // A poll already running started with the old list; the next one picks up the change
+  await inFlight?.catch(() => undefined);
+  await poll(false);
 }
 
 async function ensureAlarm(): Promise<void> {
@@ -173,6 +190,7 @@ export default defineBackground(() => {
 
   pollSecondsItem.watch(() => void ensureAlarm());
   workmailUrlItem.watch(() => void installHeaderRules().then(() => poll(false)));
+  disconnectedItem.watch((list) => void onDisconnectedChanged(list));
 
   const start = async () => {
     await installHeaderRules();

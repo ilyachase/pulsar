@@ -6,8 +6,11 @@ import '@awesome.me/webawesome/dist/components/callout/callout.js';
 import '@awesome.me/webawesome/dist/components/card/card.js';
 import '@awesome.me/webawesome/dist/components/icon/icon.js';
 import '@awesome.me/webawesome/dist/components/skeleton/skeleton.js';
+import { addDisconnected, removeDisconnected, toDisconnected } from '@/lib/disconnected';
 import { i18n, localizePage, unreadParts } from '@/lib/i18n';
 import type { Account, Message, State } from '@/lib/providers';
+import { isSignInPrompt } from '@/lib/providers/types';
+import { disconnectedItem, workmailUrlItem } from '@/lib/settings-store';
 import { STATE_KEY } from '@/lib/state';
 import { initTheme } from '@/lib/ui/theme';
 import { avatarHue, cleanSnippet, formatTime } from './format';
@@ -82,37 +85,93 @@ function renderMessage(accountId: string, m: Message): HTMLButtonElement {
   return row;
 }
 
-function renderHead(a: Account, trailing: HTMLElement[]): HTMLButtonElement {
+/** Disconnected in this popup: shown as an "undo" row in the account's place until it closes */
+const undoable = new Map<string, { index: number; account: Account; undo: () => Promise<void> }>();
+
+/**
+ * Pulsar stops checking the mailbox; the mail itself stays signed in. WorkMail is configured by
+ * its URL, so it's disconnected by clearing it (the host permission stays: undo needs no prompt,
+ * and the settings page re-requests it on connect anyway).
+ */
+async function disconnect(a: Account, index: number): Promise<void> {
+  let undo: () => Promise<void>;
+  if (a.provider === 'workmail') {
+    const url = await workmailUrlItem.getValue();
+    await workmailUrlItem.setValue(null);
+    undo = () => workmailUrlItem.setValue(url);
+  } else {
+    const entry = toDisconnected(a);
+    await disconnectedItem.setValue(addDisconnected(await disconnectedItem.getValue(), entry));
+    undo = async () =>
+      disconnectedItem.setValue(removeDisconnected(await disconnectedItem.getValue(), entry.key));
+  }
+  undoable.set(a.id, { index, account: a, undo });
+  rerender();
+}
+
+function renderUndo(id: string, a: Account): HTMLElement {
+  const row = el('div', 'undo');
+  const text = el('span', 'undo-text', i18n.t('popup.disconnected', [a.email]));
+  text.prepend(icon(providerIcon(a), { class: 'provider' }));
+  const back = wa('wa-button', { size: 's', appearance: 'plain', variant: 'brand' });
+  back.textContent = i18n.t('popup.undo');
+  back.addEventListener('click', async () => {
+    const entry = undoable.get(id);
+    undoable.delete(id);
+    await entry?.undo();
+    rerender();
+  });
+  row.append(text, back);
+  return row;
+}
+
+/**
+ * [provider · address · "open inbox"] [disconnect] [count]: the count stays at the card's edge, and
+ * the hover-only buttons take their room from the address, so nothing moves when they appear.
+ */
+function renderHead(a: Account, index: number, count?: HTMLElement): HTMLElement {
+  const bar = el('div', 'bar');
+  bar.slot = 'header';
   const head = el('button', 'head');
   head.type = 'button';
-  head.slot = 'header';
   head.title = a.status === 'signed-out' ? i18n.t('popup.signIn') : i18n.t('popup.openInbox');
   const who = el('span', 'who');
   who.append(el('span', 'email', a.email));
-  head.append(icon(providerIcon(a), { class: 'provider' }), who, ...trailing);
+  const openHint = el('span', 'open', i18n.t('popup.openInbox'));
+  openHint.append(icon('external'));
+  head.append(icon(providerIcon(a), { class: 'provider' }), who, openHint);
   head.addEventListener('click', () => open(a.inboxUrl));
-  return head;
+  const off = wa('wa-button', { class: 'disconnect', appearance: 'plain', size: 's' });
+  off.title = i18n.t('popup.disconnectHint');
+  off.append(icon('unplug', { label: i18n.t('popup.disconnect') }));
+  off.addEventListener('click', () => void disconnect(a, index));
+  bar.append(head, off);
+  if (count) {
+    // Outside the header button (buttons can't nest), but a click on it still opens the inbox
+    count.classList.add('count');
+    count.addEventListener('click', () => open(a.inboxUrl));
+    bar.append(count);
+  }
+  return bar;
 }
 
-function renderAccount(a: Account): HTMLElement {
+function renderAccount(a: Account, index: number): HTMLElement {
   const empty = a.messages.length === 0 && a.unreadCount === 0;
   // Every account keeps its place; one with nothing unread is a single quiet header row
   const card = wa('wa-card', { 'with-header': true, class: empty ? 'quiet' : '' });
-  const openHint = el('span', 'open', i18n.t('popup.openInbox'));
-  openHint.append(icon('external'));
-  const trailing: HTMLElement[] = [openHint];
-  // The count only adds information when there are more unread messages than rows shown
-  if (a.unreadCount > a.messages.length) {
-    const count = wa('wa-badge', { variant: 'brand', pill: true });
+  // Every mailbox with unread mail shows its count, even when all its messages are listed:
+  // counting rows by eye is not a thing anyone does
+  let count: HTMLElement | undefined;
+  if (a.unreadCount > 0) {
+    count = wa('wa-badge', { variant: 'brand', pill: true });
     count.textContent = String(a.unreadCount);
-    trailing.push(count);
   }
-  card.append(renderHead(a, trailing));
+  card.append(renderHead(a, index, count));
   for (const m of a.messages) card.append(renderMessage(a.id, m));
   return card;
 }
 
-function renderProblem(a: Account): HTMLElement {
+function renderProblem(a: Account, index: number): HTMLElement {
   const isError = a.status === 'error';
   const card = wa('wa-card', { 'with-header': true });
   const callout = wa('wa-callout', {
@@ -138,15 +197,34 @@ function renderProblem(a: Account): HTMLElement {
     action,
   );
   callout.append(calloutIcon, body);
-  card.append(renderHead(a, []), callout);
+  card.append(renderHead(a, index), callout);
   return card;
 }
 
+/** No mailboxes yet: what to do, with a sign-in button per supported service */
+function renderEmpty(prompts: Account[]): HTMLElement {
+  const box = el('div', 'empty');
+  box.append(el('p', undefined, i18n.t('popup.empty')));
+  const services = el('div', 'services');
+  for (const a of prompts) {
+    const button = wa('wa-button', { size: 's', appearance: 'outlined' });
+    const mark = icon(providerIcon(a));
+    mark.slot = 'start';
+    button.append(mark, a.email);
+    button.addEventListener('click', () => open(a.inboxUrl));
+    services.append(button);
+  }
+  box.append(services);
+  return box;
+}
+
 let lastContent = '';
+let lastState: State | undefined;
 
 function render(state: State | undefined, animate = false): void {
+  lastState = state;
   // Same mail as already shown: keep the DOM as is (silent refresh)
-  const content = state ? JSON.stringify(state.accounts) : '';
+  const content = state ? JSON.stringify([state.accounts, [...undoable.keys()]]) : '';
   if (state && content === lastContent && !animate) return;
   lastContent = content;
   list.classList.toggle('enter', animate);
@@ -157,10 +235,18 @@ function render(state: State | undefined, animate = false): void {
     return;
   }
 
-  const ok = state.accounts.filter((a) => a.status === 'ok');
+  const prompts = state.accounts.filter(isSignInPrompt);
+  const mailboxes = state.accounts.filter((a) => !isSignInPrompt(a));
+  const ok = mailboxes.filter((a) => a.status === 'ok');
   const total = ok.reduce((s, a) => s + a.unreadCount, 0);
 
   summary.replaceChildren();
+  if (mailboxes.length === 0 && undoable.size === 0) {
+    // "No new mail" would be misleading: there is no mailbox to have mail in
+    logo.classList.remove('live');
+    list.append(renderEmpty(prompts));
+    return;
+  }
   if (total > 0) {
     const [count, rest] = unreadParts(total);
     summary.append(el('b', undefined, count), rest);
@@ -169,10 +255,22 @@ function render(state: State | undefined, animate = false): void {
   }
   logo.classList.toggle('live', total > 0);
 
-  // Accounts always render in the same order, so nothing jumps when mail arrives or is read
-  for (const a of state.accounts) {
-    list.append(a.status === 'ok' ? renderAccount(a) : renderProblem(a));
-  }
+  // Accounts always render in the same order, so nothing jumps when mail arrives or is read.
+  // A just-disconnected mailbox (already gone from the state) keeps its place as an undo row.
+  const shown = mailboxes.filter((a) => !undoable.has(a.id));
+  const undos = [...undoable.values()].sort((x, y) => x.index - y.index);
+  for (const { index, account } of undos) shown.splice(index, 0, account);
+  list.append(
+    ...shown.map((a, i) => {
+      if (undoable.has(a.id)) return renderUndo(a.id, a);
+      return a.status === 'ok' ? renderAccount(a, i) : renderProblem(a, i);
+    }),
+  );
+}
+
+function rerender(): void {
+  lastContent = '';
+  render(lastState);
 }
 
 /** silent: the automatic check on open — no spinner, content is swapped in place */

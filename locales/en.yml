@@ -20,15 +20,21 @@ popup:
   refresh: Check now
   checking: Checking mail…
   noNew: No new mail
+  empty: "Sign in to your mail in this browser, and Pulsar will find your mailboxes"
   openInbox: Open inbox
   signIn: Sign in
   retry: Retry
   notSignedIn: Not signed in
   checkFailed: "Couldn't check: $1"
   unknownError: unknown error
+  disconnect: "Disconnect"
+  disconnectHint: "Pulsar will stop checking this mailbox. You stay signed in to the mail"
+  disconnected: "Disconnected: $1"
+  undo: "Undo"
 
 badge:
   noNew: no new mail
+  empty: "Sign in to your mail in this browser, and Pulsar will find your mailboxes"
   allFailed: couldn't check mail
   allSignedOut: not signed in
   failedIn:
@@ -59,6 +65,7 @@ options:
   disconnect: Disconnect
   workmailBadUrl: "Enter a link like https://webmail.mail.<region>.awsapps.com/workmail/"
   workmailDenied: Chrome didn't grant access to the mail address
+  disconnectedTitle: "Disconnected mailboxes"
 
 yandex:
   name: Yandex Mail
