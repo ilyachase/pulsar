@@ -56,7 +56,11 @@ options:
   pollInteger: Yalnızca tam sayı saniye
   pollMin: En az $1 saniye
   pollMax: En fazla $1 saniye
+  notifications: "Bildirimler"
   notify: Yeni e-postaları bildir
+  sound: Ses çal
+  notifyTest: "Dene"
+  notifyTestMessage: "Yeni e-posta bildirimleri böyle görünecek"
   order: "Posta kutularının sırası"
   moveUp: "Yukarı taşı"
   moveDown: "Aşağı taşı"
@@ -70,7 +74,11 @@ options:
   workmailBadUrl: "https://webmail.mail.<bölge>.awsapps.com/workmail/ biçiminde bir bağlantı girin"
   workmailDenied: Chrome posta sitesine erişim izni vermedi
   disconnectedTitle: "Bağlantısı kesilen posta kutuları"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "$1 tarafından ❤️ ile yapıldı"
+  support: "Yazarı destekle"
 
 yandex:
   name: Yandex Mail

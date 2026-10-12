@@ -31,9 +31,11 @@ import {
   notifyItem,
   pollSecondsItem,
   shownMessagesItem,
+  soundItem,
   workmailUrlItem,
 } from '@/lib/settings-store';
 import { STATE_KEY } from '@/lib/state';
+import { renderCredit } from '@/lib/ui/credit';
 import {
   getThemeMode,
   initTheme,
@@ -138,11 +140,26 @@ numberSetting({
   hint: () => shownMessagesRange(),
 });
 
-// Notifications: a switch that applies instantly
-const notifySwitch = document.getElementById('notify') as HTMLElement & { checked: boolean };
-void notifyItem.getValue().then((enabled) => {
-  notifySwitch.checked = enabled;
-  notifySwitch.addEventListener('change', () => void notifyItem.setValue(notifySwitch.checked));
+// Notifications and their sound: switches that apply instantly; no sound without notifications
+type Switch = HTMLElement & { checked: boolean; disabled: boolean };
+const notifySwitch = document.getElementById('notify') as Switch;
+const soundSwitch = document.getElementById('sound') as Switch;
+// "Test": shows a sample notification the way new mail would (with the chime, if it's on)
+const notifyTest = document.getElementById('notify-test') as Switch;
+notifyTest.addEventListener('click', () => {
+  void browser.runtime.sendMessage({ type: 'test-notification' });
+});
+void Promise.all([notifyItem.getValue(), soundItem.getValue()]).then(([notify, sound]) => {
+  notifySwitch.checked = notify;
+  soundSwitch.checked = sound;
+  soundSwitch.disabled = !notify;
+  notifyTest.disabled = !notify;
+  notifySwitch.addEventListener('change', () => {
+    soundSwitch.disabled = !notifySwitch.checked;
+    notifyTest.disabled = !notifySwitch.checked;
+    void notifyItem.setValue(notifySwitch.checked);
+  });
+  soundSwitch.addEventListener('change', () => void soundItem.setValue(soundSwitch.checked));
 });
 
 // Amazon WorkMail: the web client URL differs per organization (region host), so the user pastes it;
@@ -342,17 +359,4 @@ browser.storage.onChanged.addListener((changes, area) => {
 (document.getElementById('version') as HTMLElement).textContent =
   `Pulsar ${browser.runtime.getManifest().version}`;
 
-// "Made with ❤️ by <author>": the name goes into the message via $1 (word order differs by language)
-// and becomes a link to the author's GitHub
-const AUTHOR = 'Ilya L.';
-const madeBy = document.getElementById('made-by') as HTMLElement;
-const [before = '', after = ''] = (i18n.t as (key: string, s: string[]) => string)(
-  'options.madeBy',
-  [AUTHOR],
-).split(AUTHOR);
-const author = document.createElement('a');
-author.href = 'https://github.com/ilyachase';
-author.target = '_blank';
-author.rel = 'noopener noreferrer';
-author.textContent = AUTHOR;
-madeBy.append(before, author, after);
+renderCredit(document.getElementById('made-by') as HTMLElement);

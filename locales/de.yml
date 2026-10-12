@@ -56,7 +56,11 @@ options:
   pollInteger: Nur ganze Sekunden
   pollMin: Mindestens $1 Sekunden
   pollMax: Höchstens $1 Sekunden
+  notifications: "Benachrichtigungen"
   notify: Über neue E-Mails benachrichtigen
+  sound: Ton abspielen
+  notifyTest: "Testen"
+  notifyTestMessage: "So sehen Benachrichtigungen über neue E-Mails aus"
   order: "Reihenfolge der Postfächer"
   moveUp: "Nach oben"
   moveDown: "Nach unten"
@@ -70,7 +74,11 @@ options:
   workmailBadUrl: "Benötigt wird ein Link wie https://webmail.mail.<Region>.awsapps.com/workmail/"
   workmailDenied: Chrome hat keinen Zugriff auf die E-Mail-Website gewährt
   disconnectedTitle: "Getrennte Postfächer"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "Mit ❤️ erstellt von $1"
+  support: "Autor unterstützen"
 
 yandex:
   name: Yandex Mail

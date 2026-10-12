@@ -59,7 +59,11 @@ options:
   pollInteger: Whole seconds only
   pollMin: At least $1 seconds
   pollMax: At most $1 seconds
+  notifications: "Notifications"
   notify: Notify about new mail
+  sound: Play a sound
+  notifyTest: "Test"
+  notifyTestMessage: "This is how new mail notifications will look"
   order: "Mailbox order"
   moveUp: "Move up"
   moveDown: "Move down"
@@ -73,7 +77,11 @@ options:
   workmailBadUrl: "Enter a link like https://webmail.mail.<region>.awsapps.com/workmail/"
   workmailDenied: Chrome didn't grant access to the mail address
   disconnectedTitle: "Disconnected mailboxes"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "Made with ❤️ by $1"
+  support: "Support the author"
 
 yandex:
   name: Yandex Mail

@@ -60,7 +60,11 @@ options:
   pollInteger: Solo secondi interi
   pollMin: Minimo $1 secondi
   pollMax: Massimo $1 secondi
+  notifications: "Notifiche"
   notify: Notifica le nuove email
+  sound: Riproduci un suono
+  notifyTest: "Prova"
+  notifyTestMessage: "Ecco come appariranno le notifiche delle nuove email"
   order: "Ordine delle caselle"
   moveUp: "Sposta su"
   moveDown: "Sposta giù"
@@ -74,7 +78,11 @@ options:
   workmailBadUrl: "Serve un link come https://webmail.mail.<regione>.awsapps.com/workmail/"
   workmailDenied: Chrome non ha concesso l'accesso al sito della posta
   disconnectedTitle: "Caselle scollegate"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "Fatto con ❤️ da $1"
+  support: "Sostieni l'autore"
 
 yandex:
   name: Yandex Mail

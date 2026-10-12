@@ -52,7 +52,11 @@ options:
   pollInteger: Hanya detik bilangan bulat
   pollMin: Minimal $1 detik
   pollMax: Maksimal $1 detik
+  notifications: "Notifikasi"
   notify: Beri tahu email baru
+  sound: Putar suara
+  notifyTest: "Uji"
+  notifyTestMessage: "Seperti inilah tampilan notifikasi email baru"
   order: "Urutan kotak surat"
   moveUp: "Naikkan"
   moveDown: "Turunkan"
@@ -66,7 +70,11 @@ options:
   workmailBadUrl: "Masukkan link seperti https://webmail.mail.<region>.awsapps.com/workmail/"
   workmailDenied: Chrome tidak memberi akses ke situs email
   disconnectedTitle: "Kotak surat yang diputuskan"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "Dibuat dengan ❤️ oleh $1"
+  support: "Dukung pembuat"
 
 yandex:
   name: Yandex Mail

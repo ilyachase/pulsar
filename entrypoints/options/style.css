@@ -133,6 +133,15 @@ h1 {
 .foot a {
   color: var(--wa-color-text-link);
 }
+/* The credit's two lines stack with the version line */
+#made-by {
+  display: contents;
+}
+.foot .support {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wa-space-3xs);
+}
 
 @media (max-width: 560px) {
   .row {
@@ -156,8 +165,11 @@ h1 {
 }
 
 .card-title {
-  display: block;
-  margin-bottom: var(--wa-space-s);
+  margin: 0;
+}
+/* A header button overlaps the header's padding instead of making it taller than the others */
+wa-button[slot="header-actions"] {
+  margin-block: calc(-1 * var(--wa-space-s));
 }
 .mailbox {
   gap: var(--wa-space-s);

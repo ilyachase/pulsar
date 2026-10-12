@@ -57,11 +57,6 @@
           <wa-number-input id="messages" class="number" required step="1" without-steppers size="s"></wa-number-input>
         </div>
         <wa-divider></wa-divider>
-        <div class="row">
-          <label class="name" for="notify" data-i18n="options.notify"></label>
-          <wa-switch id="notify"></wa-switch>
-        </div>
-        <wa-divider></wa-divider>
         <div class="row workmail">
           <div class="label">
             <label class="name" for="workmail-url">Amazon WorkMail</label>
@@ -75,15 +70,29 @@
         </div>
       </wa-card>
 
+      <wa-card>
+        <h2 slot="header" class="card-title wa-heading-m" data-i18n="options.notifications"></h2>
+        <wa-button id="notify-test" slot="header-actions" size="s" appearance="plain" variant="brand" data-i18n="options.notifyTest"></wa-button>
+        <div class="row">
+          <label class="name" for="notify" data-i18n="options.notify"></label>
+          <wa-switch id="notify"></wa-switch>
+        </div>
+        <wa-divider></wa-divider>
+        <div class="row">
+          <label class="name" for="sound" data-i18n="options.sound"></label>
+          <wa-switch id="sound"></wa-switch>
+        </div>
+      </wa-card>
+
       <!-- Drag to reorder (or Move up/down by keyboard); shown when there are two mailboxes or more -->
       <wa-card id="order-card" hidden>
-        <span class="name card-title" data-i18n="options.order"></span>
+        <h2 slot="header" class="card-title wa-heading-m" data-i18n="options.order"></h2>
         <ol id="order-list" class="order"></ol>
       </wa-card>
 
       <!-- Mailboxes disconnected from the popup; shown only when there are any -->
       <wa-card id="disconnected-card" hidden>
-        <span class="name card-title" data-i18n="options.disconnectedTitle"></span>
+        <h2 slot="header" class="card-title wa-heading-m" data-i18n="options.disconnectedTitle"></h2>
         <div id="disconnected-list"></div>
       </wa-card>
 

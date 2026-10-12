@@ -60,7 +60,11 @@ options:
   pollInteger: Apenas segundos inteiros
   pollMin: Mínimo de $1 segundos
   pollMax: Máximo de $1 segundos
+  notifications: "Notificações"
   notify: Notificar novos e-mails
+  sound: Tocar um som
+  notifyTest: "Testar"
+  notifyTestMessage: "É assim que as notificações de novos e-mails vão aparecer"
   order: "Ordem das caixas"
   moveUp: "Mover para cima"
   moveDown: "Mover para baixo"
@@ -74,7 +78,11 @@ options:
   workmailBadUrl: "Use um link como https://webmail.mail.<região>.awsapps.com/workmail/"
   workmailDenied: O Chrome não concedeu acesso ao site do e-mail
   disconnectedTitle: "Caixas desconectadas"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "Feito com ❤️ por $1"
+  support: "Apoie o autor"
 
 yandex:
   name: Yandex Mail

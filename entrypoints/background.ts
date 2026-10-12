@@ -1,6 +1,6 @@
 import { computeBadge } from '@/lib/badge';
 import { type Disconnected, withoutDisconnected } from '@/lib/disconnected';
-import { unreadText } from '@/lib/i18n';
+import { i18n, unreadText } from '@/lib/i18n';
 import {
   findNewMessages,
   MAX_SEPARATE_NOTIFICATIONS,
@@ -17,8 +17,10 @@ import {
   disconnectedItem,
   notifyItem,
   pollSecondsItem,
+  soundItem,
   workmailUrlItem,
 } from '@/lib/settings-store';
+import { playSound } from '@/lib/sound';
 import { hideOpenedSince, markRead, openedKey, STATE_KEY } from '@/lib/state';
 
 const ALARM = 'poll';
@@ -79,17 +81,21 @@ async function readState(): Promise<State | undefined> {
   return (await browser.storage.local.get(STATE_KEY))[STATE_KEY] as State | undefined;
 }
 
-/** System notifications (Windows plays its own sound): one per message, or a summary */
+/** System notifications: one per message, or a summary, with Pulsar's chime once per check */
 async function notify(fresh: NewMessage[]): Promise<void> {
   if (fresh.length === 0) return;
   if (!(await notifyItem.getValue())) return;
   const iconUrl = browser.runtime.getURL('/icon/128.png');
+  // With our chime on, the system's own notification sound would play on top of it
+  const silent = await soundItem.getValue();
+  if (silent) void playSound().catch(() => undefined);
   if (fresh.length > MAX_SEPARATE_NOTIFICATIONS) {
     const n = fresh.length;
     await browser.notifications.create(SUMMARY_NOTIFICATION, {
       type: 'basic',
       iconUrl,
       title: unreadText(n),
+      silent,
       message: [...new Set(fresh.map((f) => f.message.from || f.message.fromEmail))].join(', '),
     });
     return;
@@ -101,8 +107,26 @@ async function notify(fresh: NewMessage[]): Promise<void> {
       title: message.from || message.fromEmail,
       message: message.subject,
       contextMessage: account.email,
+      silent,
     });
   }
+}
+
+const TEST_NOTIFICATION = 'test';
+
+/** "Test" in the settings: a sample notification with the same sound settings as real ones */
+async function notifyTest(): Promise<void> {
+  const silent = await soundItem.getValue();
+  if (silent) void playSound().catch(() => undefined);
+  // Replacing a still visible one wouldn't pop it up again
+  await browser.notifications.clear(TEST_NOTIFICATION);
+  await browser.notifications.create(TEST_NOTIFICATION, {
+    type: 'basic',
+    iconUrl: browser.runtime.getURL('/icon/128.png'),
+    title: 'Pulsar',
+    message: i18n.t('options.notifyTestMessage'),
+    silent,
+  });
 }
 
 /** Opens the message behind a notification and counts it as read, like a click in the popup */
@@ -185,6 +209,7 @@ export default defineBackground(() => {
     const m = msg as { type?: string; accountId?: string; messageId?: string };
     // The popup is open: the user sees new mail there, no need to notify about it
     if (m?.type === 'refresh') return poll(false);
+    if (m?.type === 'test-notification') return notifyTest();
     if (m?.type === 'opened' && m.accountId && m.messageId) {
       return onOpened(m.accountId, m.messageId);
     }

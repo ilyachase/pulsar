@@ -52,7 +52,11 @@ options:
   pollInteger: 整数の秒数を入力してください
   pollMin: $1秒以上にしてください
   pollMax: $1秒以下にしてください
+  notifications: "通知"
   notify: 新着メールを通知
+  sound: 音を鳴らす
+  notifyTest: "テスト"
+  notifyTestMessage: "新着メールの通知はこのように表示されます"
   order: "メールボックスの順序"
   moveUp: "上へ"
   moveDown: "下へ"
@@ -66,7 +70,11 @@ options:
   workmailBadUrl: "https://webmail.mail.<リージョン>.awsapps.com/workmail/ の形式のリンクを入力してください"
   workmailDenied: Chrome がメールサイトへのアクセスを許可しませんでした
   disconnectedTitle: "切断したメールボックス"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "$1 が ❤️ を込めて作りました"
+  support: "作者をサポート"
 
 yandex:
   name: Yandex Mail

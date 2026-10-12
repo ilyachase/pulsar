@@ -65,7 +65,11 @@ options:
   pollInteger: Только целое число секунд
   pollMin: Минимум $1 секунд
   pollMax: Максимум $1 секунд
+  notifications: "Уведомления"
   notify: Уведомлять о новых письмах
+  sound: Звук при новом письме
+  notifyTest: "Проверить"
+  notifyTestMessage: "Так будут выглядеть уведомления о новых письмах"
   order: "Порядок ящиков"
   moveUp: "Выше"
   moveDown: "Ниже"
@@ -79,7 +83,11 @@ options:
   workmailBadUrl: "Нужна ссылка вида https://webmail.mail.<регион>.awsapps.com/workmail/"
   workmailDenied: Chrome не выдал доступ к адресу почты
   disconnectedTitle: "Отключённые ящики"
+
+# Author credit and the donation link (settings page footer)
+credit:
   madeBy: "Сделано с ❤️ автором $1"
+  support: "Поддержать автора"
 
 yandex:
   name: Яндекс Почта

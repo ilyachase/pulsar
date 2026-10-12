@@ -6,7 +6,13 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
-    permissions: ['alarms', 'storage', 'notifications', 'declarativeNetRequestWithHostAccess'],
+    permissions: [
+      'alarms',
+      'storage',
+      'notifications',
+      'offscreen',
+      'declarativeNetRequestWithHostAccess',
+    ],
     // WorkMail hosts differ per organization region; access is requested when the user connects it
     optional_host_permissions: ['https://*.awsapps.com/*'],
     host_permissions: [
