@@ -18,18 +18,24 @@ export function markRead(state: State, accountId: string, messageId: string): St
 }
 
 /**
- * A poll that started before the click may still return the message as unread.
- * Messages opened after `pollStartedAt` are dropped from such a result; a later poll shows the
- * real state again (if the mail service still has it unread, it comes back — that's fine).
+ * The Gmail Atom feed shows a message as read only a few seconds after it was opened, so a poll
+ * that starts right after the click may still return it as unread. Opened messages stay hidden
+ * for this long; after that, the mail service has the final say.
  */
-export function hideOpenedSince(
+export const OPENED_GRACE_MS = 10_000;
+
+/**
+ * Drops messages opened shortly before the poll started (or while it ran) from its result; a later
+ * poll shows the real state again (if the mail service still has it unread, it comes back — fine).
+ */
+export function hideRecentlyOpened(
   accounts: Account[],
   opened: Map<string, number>,
   pollStartedAt: number,
 ): Account[] {
   let state: State = { accounts, updatedAt: 0 };
   for (const [key, at] of opened) {
-    if (at < pollStartedAt) continue;
+    if (at < pollStartedAt - OPENED_GRACE_MS) continue;
     const [accountId, messageId] = JSON.parse(key) as [string, string];
     state = markRead(state, accountId, messageId);
   }

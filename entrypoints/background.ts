@@ -23,7 +23,7 @@ import {
   workmailUrlItem,
 } from '@/lib/settings-store';
 import { playSound } from '@/lib/sound';
-import { hideOpenedSince, markRead, openedKey, STATE_KEY } from '@/lib/state';
+import { hideRecentlyOpened, markRead, OPENED_GRACE_MS, openedKey, STATE_KEY } from '@/lib/state';
 
 const ALARM = 'poll';
 
@@ -158,11 +158,11 @@ function poll(withNotifications = true): Promise<State> {
       // A mailbox disconnected while this poll was running must not come back
       const current = withoutDisconnected(fetched, await disconnectedItem.getValue());
       const accounts = sortAccounts(
-        hideOpenedSince(current, opened, startedAt),
+        hideRecentlyOpened(current, opened, startedAt),
         await accountOrderItem.getValue(),
       );
-      // Clicks before this poll started are already reflected by the mail service (or not — fine)
-      for (const [key, at] of opened) if (at < startedAt) opened.delete(key);
+      // Older clicks are already reflected by the mail service (or not — fine)
+      for (const [key, at] of opened) if (at < startedAt - OPENED_GRACE_MS) opened.delete(key);
       const state: State = { accounts, updatedAt: Date.now() };
       await publish(state);
       const seen = (await browser.storage.local.get(SEEN_KEY))[SEEN_KEY] as

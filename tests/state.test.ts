@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Account, Message, State } from '../lib/providers/types';
-import { hideOpenedSince, markRead, openedKey } from '../lib/state';
+import { hideRecentlyOpened, markRead, OPENED_GRACE_MS, openedKey } from '../lib/state';
 
 const msg = (id: string): Message => ({
   id,
@@ -39,13 +39,15 @@ describe('markRead', () => {
   });
 });
 
-describe('hideOpenedSince', () => {
-  it('hides only messages opened after the poll started', () => {
+describe('hideRecentlyOpened', () => {
+  it('hides messages opened shortly before or during the poll', () => {
+    const start = 100_000;
     const opened = new Map([
-      [openedKey('a', '1'), 100], // before the poll: the mail service has the final say
-      [openedKey('a', '2'), 300], // during the poll: the result may be stale
+      [openedKey('a', '1'), start - OPENED_GRACE_MS - 1], // long ago: the mail service has the final say
+      [openedKey('a', '2'), start - 3_000], // just before: the feed may not show it read yet
+      [openedKey('a', '3'), start + 500], // during the poll: the result may be stale
     ]);
-    const result = hideOpenedSince([acc('a', ['1', '2'])], opened, 200);
+    const result = hideRecentlyOpened([acc('a', ['1', '2', '3'])], opened, start);
     expect(result[0]?.messages.map((m) => m.id)).toEqual(['1']);
     expect(result[0]?.unreadCount).toBe(1);
   });
