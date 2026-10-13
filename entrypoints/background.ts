@@ -7,6 +7,8 @@ import {
   type NewMessage,
   notificationId,
   parseNotificationId,
+  rememberSeen,
+  type SeenMessages,
 } from '@/lib/notify';
 import { sortAccounts } from '@/lib/order';
 import { fetchAllAccounts, type State } from '@/lib/providers';
@@ -80,6 +82,9 @@ async function readState(): Promise<State | undefined> {
   return (await browser.storage.local.get(STATE_KEY))[STATE_KEY] as State | undefined;
 }
 
+/** Messages already shown (popup or notification), kept across checks and browser restarts */
+const SEEN_KEY = 'seenMessages';
+
 /** System notifications: one per message, or a summary, with Pulsar's chime once per check */
 async function notify(fresh: NewMessage[]): Promise<void> {
   if (fresh.length === 0) return;
@@ -149,7 +154,6 @@ function poll(withNotifications = true): Promise<State> {
   inFlight ??= (async () => {
     const startedAt = Date.now();
     try {
-      const prev = await readState();
       const fetched = await fetchAllAccounts(await disconnectedItem.getValue());
       // A mailbox disconnected while this poll was running must not come back
       const current = withoutDisconnected(fetched, await disconnectedItem.getValue());
@@ -161,7 +165,11 @@ function poll(withNotifications = true): Promise<State> {
       for (const [key, at] of opened) if (at < startedAt) opened.delete(key);
       const state: State = { accounts, updatedAt: Date.now() };
       await publish(state);
-      if (withNotifications) await notify(findNewMessages(prev, accounts));
+      const seen = (await browser.storage.local.get(SEEN_KEY))[SEEN_KEY] as
+        | SeenMessages
+        | undefined;
+      await browser.storage.local.set({ [SEEN_KEY]: rememberSeen(seen, accounts) });
+      if (withNotifications) await notify(findNewMessages(seen, accounts));
       return state;
     } finally {
       inFlight = null;

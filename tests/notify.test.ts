@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { findNewMessages, notificationId, parseNotificationId } from '../lib/notify';
-import type { Account, Message, State } from '../lib/providers/types';
+import {
+  findNewMessages,
+  MAX_SEEN_PER_ACCOUNT,
+  notificationId,
+  parseNotificationId,
+  rememberSeen,
+  type SeenMessages,
+} from '../lib/notify';
+import type { Account, Message } from '../lib/providers/types';
 
 const msg = (id: string): Message => ({
   id,
@@ -20,25 +27,54 @@ const acc = (id: string, ids: string[], status: Account['status'] = 'ok'): Accou
   inboxUrl: '',
   messages: ids.map(msg),
 });
-const state = (...accounts: Account[]): State => ({ accounts, updatedAt: 0 });
+const seenOf = (...accounts: Account[]): SeenMessages => rememberSeen(undefined, accounts);
+const keys = (found: { account: Account; message: Message }[]) =>
+  found.map((n) => `${n.account.id}/${n.message.id}`);
 
 describe('findNewMessages', () => {
   it('reports nothing on the first check', () => {
     expect(findNewMessages(undefined, [acc('a', ['1', '2'])])).toEqual([]);
   });
 
-  it('reports only messages that were not there before, per account', () => {
-    const prev = state(acc('a', ['1']), acc('b', ['1']));
-    const found = findNewMessages(prev, [acc('a', ['1', '2']), acc('b', ['1', '9'])]);
-    expect(found.map((n) => `${n.account.id}/${n.message.id}`)).toEqual(['a/2', 'b/9']);
+  it('reports only messages not seen before, per account', () => {
+    const seen = seenOf(acc('a', ['1']), acc('b', ['1']));
+    const found = findNewMessages(seen, [acc('a', ['1', '2']), acc('b', ['1', '9'])]);
+    expect(keys(found)).toEqual(['a/2', 'b/9']);
   });
 
   it('treats the same message id in another account as new', () => {
-    expect(findNewMessages(state(acc('a', ['1'])), [acc('b', ['1'])])).toHaveLength(1);
+    const seen = { ...seenOf(acc('a', ['1'])), b: [] };
+    expect(findNewMessages(seen, [acc('b', ['1'])])).toHaveLength(1);
+  });
+
+  it('announces nothing for a mailbox seen for the first time', () => {
+    expect(findNewMessages(seenOf(acc('a', ['1'])), [acc('b', ['1', '2'])])).toEqual([]);
   });
 
   it('ignores accounts that are signed out or failed', () => {
-    expect(findNewMessages(state(), [acc('a', ['1'], 'error')])).toEqual([]);
+    expect(findNewMessages({ a: [] }, [acc('a', ['1'], 'error')])).toEqual([]);
+  });
+
+  it('does not announce old mail again after a failed check', () => {
+    let seen = seenOf(acc('a', ['1', '2']));
+    seen = rememberSeen(seen, [acc('a', [], 'error')]);
+    expect(keys(findNewMessages(seen, [acc('a', ['1', '2', '3'])]))).toEqual(['a/3']);
+  });
+
+  it('does not announce a message again when it returns to the list', () => {
+    let seen = seenOf(acc('a', ['1', '2']));
+    seen = rememberSeen(seen, [acc('a', ['2'])]);
+    expect(findNewMessages(seen, [acc('a', ['1', '2'])])).toEqual([]);
+  });
+});
+
+describe('rememberSeen', () => {
+  it('keeps the newest ids up to the limit', () => {
+    const many = Array.from({ length: MAX_SEEN_PER_ACCOUNT }, (_, i) => `old${i}`);
+    const seen = rememberSeen({ a: many }, [acc('a', ['new'])]);
+    expect(seen.a).toHaveLength(MAX_SEEN_PER_ACCOUNT);
+    expect(seen.a?.[0]).toBe('new');
+    expect(seen.a).not.toContain(`old${MAX_SEEN_PER_ACCOUNT - 1}`);
   });
 });
 
