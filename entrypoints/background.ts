@@ -1,3 +1,4 @@
+import { storage } from 'wxt/utils/storage';
 import { computeBadge } from '@/lib/badge';
 import { type Disconnected, withoutDisconnected } from '@/lib/disconnected';
 import { i18n, unreadText } from '@/lib/i18n';
@@ -10,8 +11,10 @@ import {
   rememberSeen,
   type SeenMessages,
 } from '@/lib/notify';
+import { openMessageTab } from '@/lib/open-message';
 import { sortAccounts } from '@/lib/order';
 import { fetchAllAccounts, type State } from '@/lib/providers';
+import { markGmailMessageRead } from '@/lib/providers/gmail-read';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import { clampPollSeconds } from '@/lib/settings';
 import {
@@ -23,7 +26,14 @@ import {
   workmailUrlItem,
 } from '@/lib/settings-store';
 import { playSound } from '@/lib/sound';
-import { hideRecentlyOpened, markRead, OPENED_GRACE_MS, openedKey, STATE_KEY } from '@/lib/state';
+import {
+  hideRecentlyOpened,
+  markRead,
+  type Opened,
+  openedKey,
+  STATE_KEY,
+  stillOpened,
+} from '@/lib/state';
 
 const ALARM = 'poll';
 
@@ -66,8 +76,11 @@ async function installHeaderRules(): Promise<void> {
 }
 
 let inFlight: Promise<State> | null = null;
-/** Messages opened from the popup: key → time of the click */
-const opened = new Map<string, number>();
+/**
+ * Messages opened from the popup, kept hidden until the mail service shows them read. Session
+ * storage, not a variable: the service worker is stopped between polls and would forget them.
+ */
+const openedItem = storage.defineItem<Opened>('session:opened', { fallback: {} });
 
 async function publish(state: State): Promise<void> {
   await browser.storage.local.set({ [STATE_KEY]: state });
@@ -141,8 +154,7 @@ async function onNotificationClicked(id: string): Promise<void> {
   const account = ref && state?.accounts.find((a) => a.id === ref.accountId);
   const message = ref && account?.messages.find((m) => m.id === ref.messageId);
   if (ref && message) {
-    await browser.tabs.create({ url: message.url });
-    await onOpened(ref.accountId, ref.messageId);
+    await openAccountMessage(ref.accountId, ref.messageId);
     return;
   }
   // The summary (or a message that's gone by now): show the list
@@ -158,11 +170,11 @@ function poll(withNotifications = true): Promise<State> {
       // A mailbox disconnected while this poll was running must not come back
       const current = withoutDisconnected(fetched, await disconnectedItem.getValue());
       const accounts = sortAccounts(
-        hideRecentlyOpened(current, opened, startedAt),
+        hideRecentlyOpened(current, await openedItem.getValue(), startedAt),
         await accountOrderItem.getValue(),
       );
-      // Older clicks are already reflected by the mail service (or not — fine)
-      for (const [key, at] of opened) if (at < startedAt - OPENED_GRACE_MS) opened.delete(key);
+      // Read again: a click may have come while this poll ran
+      await openedItem.setValue(stillOpened(await openedItem.getValue(), current, startedAt));
       const state: State = { accounts, updatedAt: Date.now() };
       await publish(state);
       const seen = (await browser.storage.local.get(SEEN_KEY))[SEEN_KEY] as
@@ -178,9 +190,28 @@ function poll(withNotifications = true): Promise<State> {
   return inFlight;
 }
 
-/** Optimistically treat a message opened from the popup as read */
+/** The operation lives in the worker, so closing the popup or Gmail cannot cancel it. */
+async function openAccountMessage(accountId: string, messageId: string): Promise<void> {
+  const current = await readState();
+  const account = current?.accounts.find((a) => a.id === accountId);
+  const message = account?.messages.find((m) => m.id === messageId);
+  if (!account || !message) return;
+  if (account.provider === 'gmail') {
+    if (await markGmailMessageRead(message.url, account.id)) {
+      // Protect against an older poll still returning the state from before the action.
+      await onOpened(accountId, messageId);
+    }
+    // On failure retain the unread entry; opening Gmail still lets the user read the message.
+  } else {
+    await onOpened(accountId, messageId);
+  }
+  await openMessageTab(message.url);
+}
+
+/** Hide an opened message, including from polls that started before its read confirmation. */
 async function onOpened(accountId: string, messageId: string): Promise<void> {
-  opened.set(openedKey(accountId, messageId), Date.now());
+  const opened = await openedItem.getValue();
+  await openedItem.setValue({ ...opened, [openedKey(accountId, messageId)]: Date.now() });
   const current = await readState();
   if (current) await publish(markRead(current, accountId, messageId));
 }
@@ -217,8 +248,8 @@ export default defineBackground(() => {
     // The popup is open: the user sees new mail there, no need to notify about it
     if (m?.type === 'refresh') return poll(false);
     if (m?.type === 'test-notification') return notifyTest();
-    if (m?.type === 'opened' && m.accountId && m.messageId) {
-      return onOpened(m.accountId, m.messageId);
+    if (m?.type === 'open-message' && m.accountId && m.messageId) {
+      return openAccountMessage(m.accountId, m.messageId);
     }
     return undefined;
   });

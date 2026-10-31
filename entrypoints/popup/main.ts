@@ -55,12 +55,12 @@ function open(url: string): void {
   window.close();
 }
 
-/** Counts the message as read right away; the next poll shows the mail service's real state */
+/** The worker confirms Gmail read status and opens the tab even if this popup is dismissed. */
 async function openMessage(accountId: string, m: Message): Promise<void> {
   try {
-    await browser.runtime.sendMessage({ type: 'opened', accountId, messageId: m.id });
+    await browser.runtime.sendMessage({ type: 'open-message', accountId, messageId: m.id });
   } finally {
-    open(m.url);
+    window.close();
   }
 }
 

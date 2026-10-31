@@ -9,6 +9,7 @@ export default defineConfig({
     permissions: [
       'alarms',
       'storage',
+      'cookies',
       'notifications',
       'offscreen',
       'declarativeNetRequestWithHostAccess',

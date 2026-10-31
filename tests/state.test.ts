@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Account, Message, State } from '../lib/providers/types';
-import { hideRecentlyOpened, markRead, OPENED_GRACE_MS, openedKey } from '../lib/state';
+import {
+  hideRecentlyOpened,
+  markRead,
+  OPENED_GRACE_MS,
+  openedKey,
+  stillOpened,
+} from '../lib/state';
 
 const msg = (id: string): Message => ({
   id,
@@ -42,13 +48,39 @@ describe('markRead', () => {
 describe('hideRecentlyOpened', () => {
   it('hides messages opened shortly before or during the poll', () => {
     const start = 100_000;
-    const opened = new Map([
-      [openedKey('a', '1'), start - OPENED_GRACE_MS - 1], // long ago: the mail service has the final say
-      [openedKey('a', '2'), start - 3_000], // just before: the feed may not show it read yet
-      [openedKey('a', '3'), start + 500], // during the poll: the result may be stale
-    ]);
+    const opened = {
+      [openedKey('a', '1')]: start - OPENED_GRACE_MS - 1, // long ago: the mail service has the final say
+      [openedKey('a', '2')]: start - 60_000, // a minute ago: the feed may not show it read yet
+      [openedKey('a', '3')]: start + 500, // during the poll: the result may be stale
+    };
     const result = hideRecentlyOpened([acc('a', ['1', '2', '3'])], opened, start);
     expect(result[0]?.messages.map((m) => m.id)).toEqual(['1']);
     expect(result[0]?.unreadCount).toBe(1);
+  });
+});
+
+describe('stillOpened', () => {
+  const start = 1_000_000;
+
+  it('keeps messages the mail service still lists as unread', () => {
+    const opened = { [openedKey('a', '1')]: start - 60_000 };
+    expect(stillOpened(opened, [acc('a', ['1', '2'])], start)).toEqual(opened);
+  });
+
+  it('drops messages the mail service shows read and expired ones', () => {
+    const opened = {
+      [openedKey('a', '1')]: start - 60_000, // no longer listed: Gmail caught up
+      [openedKey('a', '2')]: start - OPENED_GRACE_MS - 1, // still listed, but too long ago
+    };
+    expect(stillOpened(opened, [acc('a', ['2'])], start)).toEqual({});
+  });
+
+  it('keeps clicks made during the poll and mailboxes whose check failed', () => {
+    const opened = {
+      [openedKey('a', '1')]: start + 500,
+      [openedKey('b', '1')]: start - 60_000,
+    };
+    const failed: Account = { ...acc('b', []), status: 'error' };
+    expect(stillOpened(opened, [acc('a', []), failed], start)).toEqual(opened);
   });
 });
