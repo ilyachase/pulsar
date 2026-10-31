@@ -16,6 +16,8 @@ unread:
 noSubject: (no subject)
 
 popup:
+  markShownRead: Mark shown messages as read
+  markShownFailed: "Couldn't mark as read: $1"
   settings: Settings
   refresh: Check now
   checking: Checking mail…

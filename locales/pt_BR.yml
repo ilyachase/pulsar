@@ -15,6 +15,8 @@ unread:
 noSubject: (sem assunto)
 
 popup:
+  markShownRead: Marcar as mensagens exibidas como lidas
+  markShownFailed: "Não foi possível marcar como lidas: $1"
   settings: Configurações
   refresh: Verificar agora
   checking: Verificando e-mails…

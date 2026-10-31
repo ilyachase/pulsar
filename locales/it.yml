@@ -15,6 +15,8 @@ unread:
 noSubject: (nessun oggetto)
 
 popup:
+  markShownRead: Segna come letti i messaggi mostrati
+  markShownFailed: "Messaggi non segnati come letti: $1"
   settings: Impostazioni
   refresh: Controlla ora
   checking: Controllo della posta…

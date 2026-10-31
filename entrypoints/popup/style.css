@@ -171,6 +171,18 @@ wa-card::part(header) {
   opacity: 0;
   transition: opacity var(--wa-transition-fast);
 }
+.read-shown {
+  flex: none;
+  color: var(--wa-color-text-quiet);
+}
+.read-progress {
+  color: var(--wa-color-text-quiet);
+  font-size: var(--wa-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+.read-error {
+  margin: var(--wa-space-xs) var(--wa-space-s);
+}
 /* The last item in the header keeps the header's own edge padding */
 .bar > :last-child {
   margin-inline-end: var(--wa-space-2xs);

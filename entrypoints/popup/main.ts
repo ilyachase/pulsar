@@ -10,6 +10,12 @@ import { addDisconnected, removeDisconnected, toDisconnected } from '@/lib/disco
 import { i18n, localizePage, unreadParts } from '@/lib/i18n';
 import type { Account, Message, State } from '@/lib/providers';
 import { isSignInPrompt } from '@/lib/providers/types';
+import {
+  optimisticReadState,
+  type ReadShownJobs,
+  readShownJobsItem,
+  shownMessageIds,
+} from '@/lib/read-shown';
 import { clampShownMessages, DEFAULT_SHOWN_MESSAGES } from '@/lib/settings';
 import { disconnectedItem, shownMessagesItem, workmailUrlItem } from '@/lib/settings-store';
 import { STATE_KEY } from '@/lib/state';
@@ -66,10 +72,44 @@ async function openMessage(accountId: string, m: Message): Promise<void> {
 
 /** Messages listed per mailbox (a display setting: Pulsar still tracks all of them for notifications) */
 let shownMessages = DEFAULT_SHOWN_MESSAGES;
+let readJobs: ReadShownJobs = {};
+
+async function markShownRead(account: Account): Promise<void> {
+  if (readJobs[account.id]?.status === 'running') return;
+  const messageIds = shownMessageIds(account, shownMessages);
+  readJobs[account.id] = {
+    total: messageIds.length,
+    processed: 0,
+    failed: 0,
+    status: 'running',
+    pendingIds: messageIds,
+  };
+  rerender();
+  try {
+    await browser.runtime.sendMessage({
+      type: 'mark-shown-read',
+      accountId: account.id,
+      messageIds,
+    });
+    readJobs = await readShownJobsItem.getValue();
+    rerender();
+  } catch {
+    // Roll back the local optimistic view when the worker cannot accept the operation.
+    readJobs[account.id] = {
+      total: messageIds.length,
+      processed: messageIds.length,
+      failed: messageIds.length,
+      status: 'error',
+      pendingIds: [],
+    };
+    rerender();
+  }
+}
 
 function renderMessage(accountId: string, m: Message): HTMLButtonElement {
   const row = el('button', 'row');
   row.type = 'button';
+  row.disabled = readJobs[accountId]?.status === 'running';
   row.title = m.fromEmail ? `${m.from} <${m.fromEmail}>` : m.from;
   const name = m.from || m.fromEmail || '?';
   const avatar = wa('wa-avatar', { initials: name.trim().charAt(0).toUpperCase(), label: name });
@@ -124,7 +164,7 @@ function renderUndo(id: string, a: Account): HTMLElement {
 }
 
 /**
- * [provider · address · "open inbox"] [disconnect] [count]: the count stays at the card's edge, and
+ * [provider · address · "open inbox"] [disconnect] [mark shown read] [count]: related actions stay together,
  * the hover-only buttons take their room from the address, so nothing moves when they appear.
  */
 function renderHead(a: Account, index: number, count?: HTMLElement): HTMLElement {
@@ -143,9 +183,33 @@ function renderHead(a: Account, index: number, count?: HTMLElement): HTMLElement
   off.title = i18n.t('popup.disconnectHint');
   off.append(icon('unplug', { label: i18n.t('popup.disconnect') }));
   off.addEventListener('click', () => void disconnect(a, index));
-  bar.append(head, off);
+  const job = readJobs[a.id];
+  const busy = job?.status === 'running';
+  bar.append(head);
+  if (busy) off.setAttribute('disabled', '');
+  bar.append(off);
+  if (a.provider === 'gmail' && a.status === 'ok' && (a.messages.length > 0 || busy)) {
+    const read = wa('wa-button', {
+      class: 'read-shown',
+      appearance: 'plain',
+      size: 's',
+      loading: busy,
+      disabled: busy,
+      'aria-label': i18n.t('popup.markShownRead'),
+    });
+    read.title = i18n.t('popup.markShownRead');
+    read.append(icon('mail-check', { label: i18n.t('popup.markShownRead') }));
+    read.addEventListener('click', () => void markShownRead(a));
+    bar.append(read);
+    if (busy) {
+      const progress = el('span', 'read-progress', `${job.processed}/${job.total}`);
+      progress.setAttribute('role', 'status');
+      progress.setAttribute('aria-live', 'polite');
+      bar.append(progress);
+    }
+  }
   if (count) {
-    // Outside the header button (buttons can't nest), but a click on it still opens the inbox
+    // Outside the header button (buttons can't nest), but a click on it still opens the inbox.
     count.classList.add('count');
     count.addEventListener('click', () => open(a.inboxUrl));
     bar.append(count);
@@ -166,6 +230,19 @@ function renderAccount(a: Account, index: number): HTMLElement {
   }
   card.append(renderHead(a, index, count));
   for (const m of a.messages.slice(0, shownMessages)) card.append(renderMessage(a.id, m));
+  const job = readJobs[a.id];
+  if (job?.status === 'error') {
+    const error = wa('wa-callout', {
+      variant: 'danger',
+      size: 's',
+      class: 'read-error',
+      role: 'alert',
+    });
+    const alert = icon('circle-alert');
+    alert.slot = 'icon';
+    error.append(alert, i18n.t('popup.markShownFailed', [String(job.failed)]));
+    card.append(error);
+  }
   return card;
 }
 
@@ -221,6 +298,7 @@ let lastState: State | undefined;
 
 function render(state: State | undefined, animate = false): void {
   lastState = state;
+  if (state) state = optimisticReadState(state, readJobs);
   // Same mail as already shown: keep the DOM as is (silent refresh)
   const content = state ? JSON.stringify([state.accounts, [...undoable.keys()]]) : '';
   if (state && content === lastContent && !animate) return;
@@ -296,11 +374,19 @@ shownMessagesItem.watch((n) => {
   rerender();
 });
 
+readShownJobsItem.watch((jobs) => {
+  readJobs = jobs;
+  rerender();
+});
+
 // Render the cache instantly (the only animated paint), then quietly fetch fresh data
-void Promise.all([browser.storage.local.get(STATE_KEY), shownMessagesItem.getValue()]).then(
-  ([cached, n]) => {
-    shownMessages = clampShownMessages(n);
-    render(cached[STATE_KEY] as State | undefined, true);
-    void refresh(true);
-  },
-);
+void Promise.all([
+  browser.storage.local.get(STATE_KEY),
+  shownMessagesItem.getValue(),
+  readShownJobsItem.getValue(),
+]).then(([cached, n, jobs]) => {
+  shownMessages = clampShownMessages(n);
+  readJobs = jobs;
+  render(cached[STATE_KEY] as State | undefined, true);
+  void refresh(true);
+});

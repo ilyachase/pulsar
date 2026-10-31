@@ -13,6 +13,8 @@ unread:
 noSubject: (kein Betreff)
 
 popup:
+  markShownRead: Angezeigte Nachrichten als gelesen markieren
+  markShownFailed: "Nicht als gelesen markiert: $1"
   settings: Einstellungen
   refresh: Jetzt prüfen
   checking: E-Mails werden geprüft…

@@ -16,6 +16,14 @@ import { sortAccounts } from '@/lib/order';
 import { fetchAllAccounts, type State } from '@/lib/providers';
 import { markGmailMessageRead } from '@/lib/providers/gmail-read';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
+import {
+  interruptedReadJobs,
+  optimisticReadState,
+  type ReadShownJob,
+  readShownJobsItem,
+  readShownMessages,
+  requestedShownMessages,
+} from '@/lib/read-shown';
 import { clampPollSeconds } from '@/lib/settings';
 import {
   accountOrderItem,
@@ -82,9 +90,34 @@ let inFlight: Promise<State> | null = null;
  */
 const openedItem = storage.defineItem<Opened>('session:opened', { fallback: {} });
 
+const readShownTasks = new Map<string, Promise<void>>();
+const readJobsReady = readShownJobsItem
+  .getValue()
+  .then((jobs) => readShownJobsItem.setValue(interruptedReadJobs(jobs)));
+let readJobWrites: Promise<void> = readJobsReady;
+
+function updateReadJob(accountId: string, job: ReadShownJob | null): Promise<void> {
+  const write = readJobWrites.then(async () => {
+    const jobs = { ...(await readShownJobsItem.getValue()) };
+    if (job) jobs[accountId] = job;
+    else delete jobs[accountId];
+    await readShownJobsItem.setValue(jobs);
+    const state = await readState();
+    if (state) await updateBadge(state);
+  });
+  readJobWrites = write.catch(() => undefined);
+  return write;
+}
+
 async function publish(state: State): Promise<void> {
   await browser.storage.local.set({ [STATE_KEY]: state });
-  const badge = computeBadge(state.accounts);
+  await updateBadge(state);
+}
+
+async function updateBadge(state: State): Promise<void> {
+  const badge = computeBadge(
+    optimisticReadState(state, await readShownJobsItem.getValue()).accounts,
+  );
   await browser.action.setBadgeText({ text: badge.text });
   await browser.action.setBadgeBackgroundColor({ color: badge.color });
 }
@@ -208,6 +241,51 @@ async function openAccountMessage(accountId: string, messageId: string): Promise
   await openMessageTab(message.url);
 }
 
+/** The popup sends exactly its shown IDs; processing survives dismissing the popup. */
+function markShownRead(accountId: string, ids: unknown): Promise<void> {
+  const running = readShownTasks.get(accountId);
+  if (running) return running;
+  const task = (async () => {
+    await readJobsReady;
+    const state = await readState();
+    const account = state?.accounts.find((a) => a.id === accountId);
+    if (!account) return;
+    const messages = requestedShownMessages(account, ids);
+    if (!messages.length) return;
+    await updateReadJob(accountId, {
+      total: messages.length,
+      processed: 0,
+      failed: 0,
+      status: 'running',
+      pendingIds: messages.map((message) => message.id),
+    });
+    const result = await readShownMessages(
+      messages,
+      (message) => markGmailMessageRead(message.url, account.id),
+      (message) => onOpened(account.id, message.id),
+      (job) => updateReadJob(accountId, job),
+    );
+    await updateReadJob(
+      accountId,
+      result.failed ? { ...result, status: 'error', pendingIds: [] } : null,
+    );
+  })()
+    .catch(async () => {
+      const job = (await readShownJobsItem.getValue())[accountId];
+      if (job)
+        await updateReadJob(accountId, {
+          ...job,
+          status: 'error',
+          pendingIds: [],
+          failed: job.failed + job.total - job.processed,
+          processed: job.total,
+        });
+    })
+    .finally(() => readShownTasks.delete(accountId));
+  readShownTasks.set(accountId, task);
+  return task;
+}
+
 /** Hide an opened message, including from polls that started before its read confirmation. */
 async function onOpened(accountId: string, messageId: string): Promise<void> {
   const opened = await openedItem.getValue();
@@ -244,12 +322,20 @@ export default defineBackground(() => {
   });
 
   browser.runtime.onMessage.addListener((msg: unknown) => {
-    const m = msg as { type?: string; accountId?: string; messageId?: string };
+    const m = msg as {
+      type?: string;
+      accountId?: string;
+      messageId?: string;
+      messageIds?: unknown;
+    };
     // The popup is open: the user sees new mail there, no need to notify about it
     if (m?.type === 'refresh') return poll(false);
     if (m?.type === 'test-notification') return notifyTest();
     if (m?.type === 'open-message' && m.accountId && m.messageId) {
       return openAccountMessage(m.accountId, m.messageId);
+    }
+    if (m?.type === 'mark-shown-read' && m.accountId) {
+      return markShownRead(m.accountId, m.messageIds);
     }
     return undefined;
   });

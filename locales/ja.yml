@@ -11,6 +11,8 @@ unread:
 noSubject: (件名なし)
 
 popup:
+  markShownRead: 表示中のメールを既読にする
+  markShownFailed: "既読にできなかったメール: $1"
   settings: 設定
   refresh: 今すぐ確認
   checking: メールを確認しています…

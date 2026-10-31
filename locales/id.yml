@@ -11,6 +11,8 @@ unread:
 noSubject: (tanpa subjek)
 
 popup:
+  markShownRead: Tandai pesan yang ditampilkan sebagai sudah dibaca
+  markShownFailed: "Gagal ditandai sebagai sudah dibaca: $1"
   settings: Setelan
   refresh: Periksa sekarang
   checking: Memeriksa email…

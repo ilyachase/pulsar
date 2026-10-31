@@ -18,6 +18,8 @@ unread:
 noSubject: (без темы)
 
 popup:
+  markShownRead: Пометить показанные прочитанными
+  markShownFailed: "Не удалось пометить прочитанными: $1"
   settings: Настройки
   refresh: Проверить сейчас
   checking: Проверяю почту…
