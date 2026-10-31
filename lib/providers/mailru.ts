@@ -92,32 +92,89 @@ async function getJson(url: string, fetchFn: typeof fetch): Promise<unknown> {
 const api = (path: string, params: Record<string, string>) =>
   `${ORIGIN}/api/v1/${path}?${new URLSearchParams({ ...params, htmlencoded: 'false' })}`;
 
+async function sessionToken(email: string, fetchFn: typeof fetch): Promise<string | null> {
+  const short = (await getJson(api('user/short', { email }), fetchFn)) as {
+    status?: number;
+    body?: { token?: string };
+  };
+  return short.status === 200 && short.body?.token ? short.body.token : null;
+}
+
+async function unreadMailbox(
+  email: string,
+  token: string,
+  fetchFn: typeof fetch,
+): Promise<Account> {
+  const status = await getJson(
+    api('messages/status', {
+      folder: INBOX,
+      limit: String(MAX_MESSAGES),
+      offset: '0',
+      filters: JSON.stringify({ unread: true }),
+      email,
+      token,
+    }),
+    fetchFn,
+  );
+  return parseMailruMessages(status as MailruStatus, email);
+}
+
 async function fetchMailbox(email: string, fetchFn: typeof fetch): Promise<Account> {
   try {
-    const short = (await getJson(api('user/short', { email }), fetchFn)) as {
-      status?: number;
-      body?: { token?: string };
-    };
-    const token = short.body?.token;
+    const token = await sessionToken(email, fetchFn);
     // The session lost this account (signed out of it in another tab)
-    if (short.status !== 200 || !token) {
+    if (!token) {
       return { ...signedOut('mailru', email, MAILRU_LOGIN_URL), id: `mailru:${email}` };
     }
-    const status = await getJson(
-      api('messages/status', {
-        folder: INBOX,
-        limit: String(MAX_MESSAGES),
-        offset: '0',
-        filters: JSON.stringify({ unread: true }),
-        email,
-        token,
-      }),
-      fetchFn,
-    );
-    return parseMailruMessages(status as MailruStatus, email);
+    return await unreadMailbox(email, token, fetchFn);
   } catch (err) {
     return { ...failed('mailru', email, inboxUrl(email), err), id: `mailru:${email}` };
   }
+}
+
+/** Use the message operation, not threads/marks: unshown siblings must remain unread. */
+export async function markMailruMessageRead(
+  account: Account,
+  message: Message,
+  fetchFn: typeof fetch = fetch,
+): Promise<boolean> {
+  if (
+    account.provider !== 'mailru' ||
+    account.id !== `mailru:${account.email}` ||
+    account.inboxUrl !== inboxUrl(account.email)
+  )
+    return false;
+  if (!message.id || message.url !== messageUrl(message.id, account.email)) return false;
+  try {
+    const token = await sessionToken(account.email, fetchFn);
+    if (!token) return false;
+    const before = await unreadMailbox(account.email, token, fetchFn);
+    if (!before.messages.some((m) => m.id === message.id)) return false;
+    const body = new URLSearchParams({
+      email: account.email,
+      htmlencoded: 'false',
+      token,
+      marks: JSON.stringify([{ name: 'unread', unset: [message.id], folder: Number(INBOX) }]),
+    });
+    const response = await fetchFn(`${ORIGIN}/api/v1/messages/marks`, {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store',
+      body,
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) return false;
+    const result = (await response.json()) as { status?: number };
+    if (result.status !== 200) return false;
+    for (let check = 0; check < 6; check++) {
+      if (check > 0) await new Promise((r) => setTimeout(r, 500));
+      const after = await unreadMailbox(account.email, token, fetchFn);
+      if (!after.messages.some((m) => m.id === message.id)) return true;
+    }
+  } catch {
+    // Never expose request errors containing a session token; the caller rolls back optimistic reads.
+  }
+  return false;
 }
 
 export async function fetchMailruAccounts(fetchFn: typeof fetch = fetch): Promise<Account[]> {

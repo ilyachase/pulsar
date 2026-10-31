@@ -9,6 +9,7 @@ import '@awesome.me/webawesome/dist/components/skeleton/skeleton.js';
 import { addDisconnected, removeDisconnected, toDisconnected } from '@/lib/disconnected';
 import { i18n, localizePage, unreadParts } from '@/lib/i18n';
 import type { Account, Message, State } from '@/lib/providers';
+import { canMarkMessagesRead } from '@/lib/providers/read-capabilities';
 import { isSignInPrompt } from '@/lib/providers/types';
 import {
   optimisticReadState,
@@ -188,12 +189,11 @@ function renderHead(a: Account, index: number, count?: HTMLElement): HTMLElement
   bar.append(head);
   if (busy) off.setAttribute('disabled', '');
   bar.append(off);
-  if (a.provider === 'gmail' && a.status === 'ok' && (a.messages.length > 0 || busy)) {
+  if (canMarkMessagesRead(a.provider) && a.status === 'ok' && a.messages.length > 0) {
     const read = wa('wa-button', {
       class: 'read-shown',
       appearance: 'plain',
       size: 's',
-      loading: busy,
       disabled: busy,
       'aria-label': i18n.t('popup.markShownRead'),
     });
@@ -201,12 +201,6 @@ function renderHead(a: Account, index: number, count?: HTMLElement): HTMLElement
     read.append(icon('mail-check', { label: i18n.t('popup.markShownRead') }));
     read.addEventListener('click', () => void markShownRead(a));
     bar.append(read);
-    if (busy) {
-      const progress = el('span', 'read-progress', `${job.processed}/${job.total}`);
-      progress.setAttribute('role', 'status');
-      progress.setAttribute('aria-live', 'polite');
-      bar.append(progress);
-    }
   }
   if (count) {
     // Outside the header button (buttons can't nest), but a click on it still opens the inbox.

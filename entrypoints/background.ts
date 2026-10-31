@@ -15,6 +15,7 @@ import { openMessageTab } from '@/lib/open-message';
 import { sortAccounts } from '@/lib/order';
 import { fetchAllAccounts, type State } from '@/lib/providers';
 import { markGmailMessageRead } from '@/lib/providers/gmail-read';
+import { markProviderMessageRead } from '@/lib/providers/read';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import {
   interruptedReadJobs,
@@ -261,7 +262,7 @@ function markShownRead(accountId: string, ids: unknown): Promise<void> {
     });
     const result = await readShownMessages(
       messages,
-      (message) => markGmailMessageRead(message.url, account.id),
+      (message) => markProviderMessageRead(account, message),
       (message) => onOpened(account.id, message.id),
       (job) => updateReadJob(accountId, job),
     );

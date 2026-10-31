@@ -92,6 +92,80 @@ export function toMessages(items: MailItem[], inboxUrl: string): Message[] {
     });
 }
 
+async function openWorkmail(webmailUrl: string, fetchFn: typeof fetch) {
+  const url = parseWorkmailUrl(webmailUrl);
+  if (!url) return null;
+  const inboxUrl = url.toString();
+  const page = await fetchFn(inboxUrl, {
+    credentials: 'include',
+    cache: 'no-store',
+    redirect: 'manual',
+  });
+  // Signed out: a redirect to signin.aws (we stop at it: no host permission there)
+  if (page.type === 'opaqueredirect' || (page.status >= 300 && page.status < 400)) {
+    return null;
+  }
+  if (!page.ok) throw new Error(`HTTP ${page.status}`);
+  const tokens = parseWorkmailPage(await page.text());
+  if (!tokens) return null;
+
+  const post = async (action: string, body: unknown, csrf: string) => {
+    const res = await fetchFn(`${url.origin}/workmail/ajax?${action}&v2`, {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8;',
+        'x-amzn-action': action === 'authenticate' ? 'authenticate' : 'ajax',
+        'x-amzn-csrf': csrf,
+        'x-amzn-csrf-ver': tokens.csrfVer,
+        'x-amzn-app-instance-id': tokens.instanceId,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  };
+
+  const auth = await post('authenticate', {}, tokens.csrf);
+  const csrf: string | undefined = auth?.tokens?.csrf;
+  if (!csrf) return null;
+  const email: string = auth.user?.smtp_address || auth.user?.email_address || 'WorkMail';
+  return { inboxUrl, email, post: (action: string, body: unknown) => post(action, body, csrf) };
+}
+
+type WorkmailSession = NonNullable<Awaited<ReturnType<typeof openWorkmail>>>;
+
+async function workmailInbox(session: WorkmailSession) {
+  const { post } = session;
+
+  const hierarchy = await post('hierarchymodule_list', {
+    hierarchymodule: { hierarchymodule1: { list: {} } },
+  });
+  const store = hierarchy?.hierarchymodule?.hierarchymodule1?.list?.item?.[0];
+  const inboxId: string | undefined = store?.props?.default_folder_inbox;
+  if (!store || !inboxId) throw new Error(i18n.t('workmail.noInbox'));
+  const inbox = store.folders?.item?.find((f: { entryid?: string }) => f.entryid === inboxId);
+
+  const list = async (): Promise<MailItem[]> => {
+    const list = await post('maillistmodule_list', {
+      maillistmodule: {
+        maillistmodule1: {
+          list: {
+            entryid: inboxId,
+            store_entryid: store.store_entryid,
+            groupDir: 'ASC',
+            sort: [{ direction: 'DESC', field: 'message_delivery_time' }],
+            restriction: { start: 0, limit: PAGE_SIZE },
+          },
+        },
+      },
+    });
+    return list?.maillistmodule?.maillistmodule1?.list?.item ?? [];
+  };
+  return { storeId: store.store_entryid as string, inboxId, inbox, list };
+}
+
 export async function fetchWorkmailAccounts(
   webmailUrl: string | null,
   fetchFn: typeof fetch = fetch,
@@ -101,70 +175,11 @@ export async function fetchWorkmailAccounts(
   if (!url) return [];
   const inboxUrl = url.toString();
   try {
-    const page = await fetchFn(inboxUrl, {
-      credentials: 'include',
-      cache: 'no-store',
-      redirect: 'manual',
-    });
-    // Signed out: a redirect to signin.aws (we stop at it: no host permission there)
-    if (page.type === 'opaqueredirect' || (page.status >= 300 && page.status < 400)) {
-      return [signedOut('workmail', 'WorkMail', inboxUrl)];
-    }
-    if (!page.ok) throw new Error(`HTTP ${page.status}`);
-    const tokens = parseWorkmailPage(await page.text());
-    if (!tokens) return [signedOut('workmail', 'WorkMail', inboxUrl)];
-
-    const post = async (action: string, body: unknown, csrf: string) => {
-      const res = await fetchFn(`${url.origin}/workmail/ajax?${action}&v2`, {
-        method: 'POST',
-        credentials: 'include',
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8;',
-          'x-amzn-action': action === 'authenticate' ? 'authenticate' : 'ajax',
-          'x-amzn-csrf': csrf,
-          'x-amzn-csrf-ver': tokens.csrfVer,
-          'x-amzn-app-instance-id': tokens.instanceId,
-        },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    };
-
-    const auth = await post('authenticate', {}, tokens.csrf);
-    const csrf: string | undefined = auth?.tokens?.csrf;
-    if (!csrf) return [signedOut('workmail', 'WorkMail', inboxUrl)];
-    const email: string = auth.user?.smtp_address || auth.user?.email_address || 'WorkMail';
-
-    const hierarchy = await post(
-      'hierarchymodule_list',
-      { hierarchymodule: { hierarchymodule1: { list: {} } } },
-      csrf,
-    );
-    const store = hierarchy?.hierarchymodule?.hierarchymodule1?.list?.item?.[0];
-    const inboxId: string | undefined = store?.props?.default_folder_inbox;
-    if (!store || !inboxId) throw new Error(i18n.t('workmail.noInbox'));
-    const inbox = store.folders?.item?.find((f: { entryid?: string }) => f.entryid === inboxId);
-
-    const list = await post(
-      'maillistmodule_list',
-      {
-        maillistmodule: {
-          maillistmodule1: {
-            list: {
-              entryid: inboxId,
-              store_entryid: store.store_entryid,
-              groupDir: 'ASC',
-              sort: [{ direction: 'DESC', field: 'message_delivery_time' }],
-              restriction: { start: 0, limit: PAGE_SIZE },
-            },
-          },
-        },
-      },
-      csrf,
-    );
-    const messages = toMessages(list?.maillistmodule?.maillistmodule1?.list?.item ?? [], inboxUrl);
+    const session = await openWorkmail(inboxUrl, fetchFn);
+    if (!session) return [signedOut('workmail', 'WorkMail', inboxUrl)];
+    const { inbox, list } = await workmailInbox(session);
+    const messages = toMessages(await list(), inboxUrl);
+    const { email } = session;
     const counter = inbox?.props?.content_unread;
 
     return [
@@ -182,4 +197,48 @@ export async function fetchWorkmailAccounts(
   } catch (err) {
     return [failed('workmail', 'WorkMail', inboxUrl, err)];
   }
+}
+
+/** Save only the read bit, preserving other flags; confirm the same item in a fresh inbox list. */
+export async function markWorkmailMessageRead(
+  account: Account,
+  message: Message,
+  fetchFn: typeof fetch = fetch,
+): Promise<boolean> {
+  if (account.provider !== 'workmail' || !parseWorkmailUrl(account.inboxUrl)) return false;
+  try {
+    const session = await openWorkmail(account.inboxUrl, fetchFn);
+    if (!session || account.id !== `workmail:${session.email}` || message.url !== session.inboxUrl)
+      return false;
+    const inbox = await workmailInbox(session);
+    const before = (await inbox.list()).find((item) => item.entryid === message.id);
+    if (!before || typeof before.props?.message_flags !== 'number') return false;
+    const flags = before.props.message_flags;
+    if (flags & MSGFLAG_READ) return true;
+    await session.post('mailitemmodule_save', {
+      mailitemmodule: {
+        mailitemmodule1: {
+          save: {
+            entryid: message.id,
+            store_entryid: inbox.storeId,
+            parent_entryid: inbox.inboxId,
+            props: { message_flags: flags | MSGFLAG_READ },
+          },
+        },
+      },
+    });
+    for (let check = 0; check < 6; check++) {
+      if (check > 0) await new Promise((r) => setTimeout(r, 500));
+      const after = (await inbox.list()).find((item) => item.entryid === message.id);
+      if (
+        after &&
+        typeof after.props?.message_flags === 'number' &&
+        after.props.message_flags & MSGFLAG_READ
+      )
+        return true;
+    }
+  } catch {
+    // Authentication/network failures roll back the optimistic view in the caller.
+  }
+  return false;
 }

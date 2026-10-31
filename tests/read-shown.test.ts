@@ -42,11 +42,18 @@ describe('shown snapshot', () => {
       expect(requestedShownMessages(account, ids)).toEqual([]);
     },
   );
-  it('rejects other providers, failed accounts and IDs outside the account', () => {
-    expect(requestedShownMessages({ ...account, provider: 'yandex' }, ['a'])).toEqual([]);
+  it('rejects failed accounts and IDs outside the account', () => {
     expect(requestedShownMessages({ ...account, status: 'error' }, ['a'])).toEqual([]);
     expect(requestedShownMessages(account, ['other-account'])).toEqual([]);
   });
+  it.each(['gmail', 'yandex', 'workmail', 'mailru'] as const)(
+    'accepts only the requested shown IDs for %s',
+    (provider) => {
+      expect(requestedShownMessages({ ...account, provider }, ['a']).map((m) => m.id)).toEqual([
+        'a',
+      ]);
+    },
+  );
 });
 
 describe('readShownMessages', () => {

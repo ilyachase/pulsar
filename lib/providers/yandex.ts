@@ -64,7 +64,7 @@ interface YandexModel {
   name: string;
   status: string;
   error?: string;
-  data?: { message?: YandexMessage[]; counters?: { unread?: number } };
+  data?: { message?: YandexMessage[]; counters?: { unread?: number }; result?: string };
 }
 export interface YandexResponse {
   models?: YandexModel[];
@@ -214,6 +214,84 @@ async function requestMessages(
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as YandexResponse;
+}
+
+/** Verified against the web client's do-messages model; confirm the selected mid in a fresh list. */
+export async function markYandexMessageRead(
+  account: Account,
+  message: Message,
+  fetchFn: typeof fetch = fetch,
+): Promise<boolean> {
+  if (account.provider !== 'yandex' || !/^\d+$/.test(message.id)) return false;
+  let inbox: URL;
+  try {
+    inbox = new URL(account.inboxUrl);
+  } catch {
+    return false;
+  }
+  const host = inbox.hostname;
+  const uid = inbox.searchParams.get('uid');
+  if (inbox.protocol !== 'https:' || !MAIL_HOSTS.some((h) => h === host) || !uid) return false;
+  if (account.id !== `yandex:${uid}` || message.url !== messageUrl(host, uid, message.id))
+    return false;
+  const key = `${host}|${uid}`;
+  try {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const session: YandexSession | null =
+        sessions.get(key) ?? (await loadSession(host, uid, fetchFn));
+      if (!session || session.uid !== uid) return false;
+      sessions.set(key, session);
+      const before = parseYandexMessages(
+        await requestMessages(host, session, fetchFn),
+        host,
+        session,
+      );
+      if (!before.messages.some((m) => m.id === message.id)) return false;
+      const response = await fetchFn(`https://${host}/web-api/models/liza1?_m=do-messages`, {
+        method: 'POST',
+        credentials: 'include',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          models: [
+            {
+              name: 'do-messages',
+              params: { action: 'mark', ids: message.id, mailboxUid: 'null' },
+              meta: { requestAttempt: 1 },
+            },
+          ],
+          _ckey: session.ckey,
+          _uid: uid,
+          _locale: 'ru',
+          _timestamp: Date.now(),
+          _product: 'RUS',
+        }),
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) return false;
+      const result = ((await response.json()) as YandexResponse).models?.find(
+        (m) => m.name === 'do-messages',
+      );
+      if (result?.status === 'error' && result.error === 'ckey' && attempt === 0) {
+        sessions.delete(key);
+        continue;
+      }
+      if (result?.status !== 'ok' || result.data?.result !== 'ok') return false;
+      for (let check = 0; check < 6; check++) {
+        if (check > 0) await new Promise((r) => setTimeout(r, 500));
+        const after = parseYandexMessages(
+          await requestMessages(host, session, fetchFn),
+          host,
+          session,
+        );
+        if (!after.messages.some((m) => m.id === message.id)) return true;
+      }
+      return false;
+    }
+  } catch {
+    sessions.delete(key);
+  }
+  return false;
 }
 
 /** One mailbox on one host; null if the page isn't there (signed out / another host) */

@@ -1,4 +1,5 @@
 import { storage } from 'wxt/utils/storage';
+import { canMarkMessagesRead } from './providers/read-capabilities';
 import { type Account, MAX_MESSAGES, type Message, type State } from './providers/types';
 import { markRead } from './state';
 
@@ -32,7 +33,7 @@ export function shownMessageIds(account: Account, limit: number): string[] {
 
 /** Validate the explicit snapshot from the popup; new mail must never join an existing operation. */
 export function requestedShownMessages(account: Account, ids: unknown): Message[] {
-  if (account.provider !== 'gmail' || account.status !== 'ok') return [];
+  if (!canMarkMessagesRead(account.provider) || account.status !== 'ok') return [];
   if (!Array.isArray(ids) || ids.length === 0 || ids.length > MAX_MESSAGES) return [];
   if (!ids.every((id) => typeof id === 'string')) return [];
   const requested = new Set(ids);

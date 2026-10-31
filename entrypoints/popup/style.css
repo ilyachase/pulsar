@@ -175,11 +175,6 @@ wa-card::part(header) {
   flex: none;
   color: var(--wa-color-text-quiet);
 }
-.read-progress {
-  color: var(--wa-color-text-quiet);
-  font-size: var(--wa-font-size-xs);
-  font-variant-numeric: tabular-nums;
-}
 .read-error {
   margin: var(--wa-space-xs) var(--wa-space-s);
 }
