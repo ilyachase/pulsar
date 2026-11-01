@@ -224,22 +224,27 @@ function poll(withNotifications = true): Promise<State> {
   return inFlight;
 }
 
-/** The operation lives in the worker, so closing the popup or Gmail cannot cancel it. */
+/** Navigate immediately; optimistic read state and its confirmation live in the worker. */
 async function openAccountMessage(accountId: string, messageId: string): Promise<void> {
   const current = await readState();
   const account = current?.accounts.find((a) => a.id === accountId);
   const message = account?.messages.find((m) => m.id === messageId);
   if (!account || !message) return;
-  if (account.provider === 'gmail') {
-    if (await markGmailMessageRead(message.url, account.id)) {
-      // Protect against an older poll still returning the state from before the action.
+  await Promise.all([
+    openMessageTab(message.url),
+    (async () => {
       await onOpened(accountId, messageId);
-    }
-    // On failure retain the unread entry; opening Gmail still lets the user read the message.
-  } else {
-    await onOpened(accountId, messageId);
-  }
-  await openMessageTab(message.url);
+      if (account.provider !== 'gmail') return;
+      if (await markGmailMessageRead(message.url, account.id)) return;
+      // Release optimistic hiding on failure and let the service decide the unread state.
+      // Finish an older poll before removing the marker so it cannot put it back.
+      await inFlight?.catch(() => undefined);
+      const opened = { ...(await openedItem.getValue()) };
+      delete opened[openedKey(accountId, messageId)];
+      await openedItem.setValue(opened);
+      await poll(false);
+    })(),
+  ]);
 }
 
 /** The popup sends exactly its shown IDs; processing survives dismissing the popup. */
