@@ -18,6 +18,7 @@ unread:
 noSubject: (без темы)
 
 popup:
+  markRead: Пометить прочитанным
   markShownRead: Пометить показанные прочитанными
   markShownFailed: "Не удалось пометить прочитанными: $1"
   settings: Настройки
@@ -85,6 +86,9 @@ yandex:
 
 mailru:
   name: Почта Mail
+
+proton:
+  name: Proton Mail
 
 workmail:
   noInbox: нет папки «Входящие»

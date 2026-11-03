@@ -75,9 +75,11 @@ async function openMessage(accountId: string, m: Message): Promise<void> {
 let shownMessages = DEFAULT_SHOWN_MESSAGES;
 let readJobs: ReadShownJobs = {};
 
-async function markShownRead(account: Account): Promise<void> {
+async function markShownRead(
+  account: Account,
+  messageIds = shownMessageIds(account, shownMessages),
+): Promise<void> {
   if (readJobs[account.id]?.status === 'running') return;
-  const messageIds = shownMessageIds(account, shownMessages);
   readJobs[account.id] = {
     total: messageIds.length,
     processed: 0,
@@ -107,11 +109,13 @@ async function markShownRead(account: Account): Promise<void> {
   }
 }
 
-function renderMessage(accountId: string, m: Message): HTMLButtonElement {
-  const row = el('button', 'row');
-  row.type = 'button';
-  row.disabled = readJobs[accountId]?.status === 'running';
-  row.title = m.fromEmail ? `${m.from} <${m.fromEmail}>` : m.from;
+function renderMessage(account: Account, m: Message): HTMLElement {
+  const row = el('div', 'row');
+  row.dataset.accountId = account.id;
+  row.dataset.messageId = m.id;
+  const open = el('button', 'message-open');
+  open.type = 'button';
+  open.title = m.fromEmail ? `${m.from} <${m.fromEmail}>` : m.from;
   const name = m.from || m.fromEmail || '?';
   const avatar = wa('wa-avatar', { initials: name.trim().charAt(0).toUpperCase(), label: name });
   avatar.style.setProperty('--hue', `var(--wa-color-${avatarHue(m.fromEmail || name)}-50)`);
@@ -119,8 +123,24 @@ function renderMessage(accountId: string, m: Message): HTMLButtonElement {
   line.append(el('span', 'subj', m.subject));
   const snippet = cleanSnippet(m.snippet, name, m.subject);
   if (snippet) line.append(` — ${snippet}`);
-  row.append(avatar, el('span', 'from', name), line, el('span', 'time', formatTime(m.date)));
-  row.addEventListener('click', () => void openMessage(accountId, m));
+  open.append(avatar, el('span', 'from', name), line, el('span', 'time', formatTime(m.date)));
+  open.addEventListener('click', () => void openMessage(account.id, m));
+  row.append(open);
+  if (canMarkMessagesRead(account.provider)) {
+    row.classList.add('has-read');
+    const label = i18n.t('popup.markRead');
+    const read = wa('wa-button', {
+      class: 'read-message',
+      appearance: 'plain',
+      size: 's',
+      disabled: readJobs[account.id]?.status === 'running',
+      'aria-label': label,
+    });
+    read.title = label;
+    read.append(icon('mail-check'));
+    read.addEventListener('click', () => void markShownRead(account, [m.id]));
+    row.append(read);
+  }
   return row;
 }
 
@@ -223,7 +243,7 @@ function renderAccount(a: Account, index: number): HTMLElement {
     count.textContent = String(a.unreadCount);
   }
   card.append(renderHead(a, index, count));
-  for (const m of a.messages.slice(0, shownMessages)) card.append(renderMessage(a.id, m));
+  for (const m of a.messages.slice(0, shownMessages)) card.append(renderMessage(a, m));
   const job = readJobs[a.id];
   if (job?.status === 'error') {
     const error = wa('wa-callout', {
@@ -297,6 +317,8 @@ function render(state: State | undefined, animate = false): void {
   const content = state ? JSON.stringify([state.accounts, [...undoable.keys()]]) : '';
   if (state && content === lastContent && !animate) return;
   lastContent = content;
+  const focusedRow = document.activeElement?.closest<HTMLElement>('.row');
+  const focusIndex = focusedRow ? [...list.querySelectorAll('.row')].indexOf(focusedRow) : -1;
   list.classList.toggle('enter', animate);
   list.replaceChildren();
   if (!state) {
@@ -336,6 +358,22 @@ function render(state: State | undefined, animate = false): void {
       return a.status === 'ok' ? renderAccount(a, i) : renderProblem(a, i);
     }),
   );
+  if (focusedRow) {
+    const rows = [...list.querySelectorAll<HTMLElement>('.row')];
+    const target =
+      rows.find(
+        (row) =>
+          row.dataset.accountId === focusedRow.dataset.accountId &&
+          row.dataset.messageId === focusedRow.dataset.messageId,
+      ) ?? rows[Math.min(focusIndex, rows.length - 1)];
+    const control =
+      target?.querySelector<HTMLElement>('.message-open') ??
+      list.querySelector<HTMLElement>('.head');
+    // Let newly created Web Awesome cards finish assigning their content slots first.
+    requestAnimationFrame(() => {
+      if (control?.isConnected) control.focus({ preventScroll: true });
+    });
+  }
 }
 
 function rerender(): void {

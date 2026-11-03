@@ -46,7 +46,7 @@ describe('shown snapshot', () => {
     expect(requestedShownMessages({ ...account, status: 'error' }, ['a'])).toEqual([]);
     expect(requestedShownMessages(account, ['other-account'])).toEqual([]);
   });
-  it.each(['gmail', 'yandex', 'workmail', 'mailru'] as const)(
+  it.each(['gmail', 'yandex', 'workmail', 'mailru', 'proton'] as const)(
     'accepts only the requested shown IDs for %s',
     (provider) => {
       expect(requestedShownMessages({ ...account, provider }, ['a']).map((m) => m.id)).toEqual([

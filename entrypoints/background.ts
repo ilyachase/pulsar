@@ -15,6 +15,7 @@ import { openMessageTab } from '@/lib/open-message';
 import { sortAccounts } from '@/lib/order';
 import { fetchAllAccounts, type State } from '@/lib/providers';
 import { markGmailMessageRead } from '@/lib/providers/gmail-read';
+import { rememberProtonSessions } from '@/lib/providers/proton';
 import { markProviderMessageRead } from '@/lib/providers/read';
 import { parseWorkmailUrl } from '@/lib/providers/workmail';
 import {
@@ -58,6 +59,7 @@ const MAIL_ORIGINS: Record<string, string> = {
   'api.passport.yandex.ru': 'https://mail.yandex.ru',
   'e.mail.ru': 'https://e.mail.ru',
   'portal.mail.ru': 'https://e.mail.ru',
+  'mail.proton.me': 'https://mail.proton.me',
 };
 const MAX_RULE_ID = 50;
 
@@ -327,13 +329,20 @@ export default defineBackground(() => {
     if (alarm.name === ALARM) void poll();
   });
 
-  browser.runtime.onMessage.addListener((msg: unknown) => {
+  browser.runtime.onMessage.addListener((msg: unknown, sender) => {
     const m = msg as {
       type?: string;
       accountId?: string;
       messageId?: string;
       messageIds?: unknown;
+      sessions?: unknown;
     };
+    // The mail page reports persisted sessions; only that origin may do it
+    if (m?.type === 'proton-sessions' && sender.url?.startsWith('https://mail.proton.me/')) {
+      return rememberProtonSessions(m.sessions).then((found) => {
+        if (found) return poll(false);
+      });
+    }
     // The popup is open: the user sees new mail there, no need to notify about it
     if (m?.type === 'refresh') return poll(false);
     if (m?.type === 'test-notification') return notifyTest();

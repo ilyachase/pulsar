@@ -11,6 +11,7 @@ unread:
 noSubject: (件名なし)
 
 popup:
+  markRead: 既読にする
   markShownRead: 表示中のメールを既読にする
   markShownFailed: "既読にできなかったメール: $1"
   settings: 設定
@@ -78,6 +79,9 @@ yandex:
 
 mailru:
   name: Mail.ru
+
+proton:
+  name: Proton Mail
 
 workmail:
   noInbox: 受信トレイ フォルダがありません

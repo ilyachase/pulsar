@@ -13,6 +13,7 @@ unread:
 noSubject: (konu yok)
 
 popup:
+  markRead: Okundu olarak işaretle
   markShownRead: Gösterilen iletileri okundu olarak işaretle
   markShownFailed: "Okundu olarak işaretlenemeyen: $1"
   settings: Ayarlar
@@ -80,6 +81,9 @@ yandex:
 
 mailru:
   name: Mail.ru
+
+proton:
+  name: Proton Mail
 
 workmail:
   noInbox: Gelen Kutusu klasörü yok

@@ -13,6 +13,7 @@ unread:
 noSubject: (kein Betreff)
 
 popup:
+  markRead: Als gelesen markieren
   markShownRead: Angezeigte Nachrichten als gelesen markieren
   markShownFailed: "Nicht als gelesen markiert: $1"
   settings: Einstellungen
@@ -80,6 +81,9 @@ yandex:
 
 mailru:
   name: Mail.ru
+
+proton:
+  name: Proton Mail
 
 workmail:
   noInbox: Ordner „Posteingang“ fehlt

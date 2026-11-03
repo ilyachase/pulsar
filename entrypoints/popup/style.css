@@ -219,6 +219,9 @@ wa-card::part(header) {
 
 /* ---------- Message rows ---------- */
 .row {
+  position: relative;
+}
+.message-open {
   all: unset;
   box-sizing: border-box;
   width: 100%;
@@ -235,7 +238,7 @@ wa-card::part(header) {
   border-top: 1px solid var(--wa-color-surface-border);
 }
 .row:hover,
-.row:focus-visible {
+.row:focus-within {
   background: var(--wa-color-brand-fill-quiet);
 }
 .row::before {
@@ -251,8 +254,39 @@ wa-card::part(header) {
   transition: opacity var(--wa-transition-fast);
 }
 .row:hover::before,
-.row:focus-visible::before {
+.row:focus-within::before {
   opacity: 1;
+}
+.message-open:focus-visible {
+  outline: var(--wa-focus-ring);
+  outline-offset: calc(-1 * var(--wa-focus-ring-width));
+}
+.read-message {
+  position: absolute;
+  inset-inline-end: var(--wa-space-xs);
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--wa-transition-fast);
+}
+.row:hover .read-message,
+.row:focus-within .read-message {
+  opacity: 1;
+  pointer-events: auto;
+}
+.row.has-read:hover .time,
+.row.has-read:focus-within .time {
+  visibility: hidden;
+}
+@media (hover: none) {
+  .read-message {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .row.has-read .time {
+    visibility: hidden;
+  }
 }
 .row wa-avatar {
   --size: 30px;

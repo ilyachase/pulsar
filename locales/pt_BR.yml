@@ -15,6 +15,7 @@ unread:
 noSubject: (sem assunto)
 
 popup:
+  markRead: Marcar como lida
   markShownRead: Marcar as mensagens exibidas como lidas
   markShownFailed: "Não foi possível marcar como lidas: $1"
   settings: Configurações
@@ -82,6 +83,9 @@ yandex:
 
 mailru:
   name: Mail.ru
+
+proton:
+  name: Proton Mail
 
 workmail:
   noInbox: pasta Caixa de entrada não encontrada

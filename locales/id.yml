@@ -11,6 +11,7 @@ unread:
 noSubject: (tanpa subjek)
 
 popup:
+  markRead: Tandai sudah dibaca
   markShownRead: Tandai pesan yang ditampilkan sebagai sudah dibaca
   markShownFailed: "Gagal ditandai sebagai sudah dibaca: $1"
   settings: Setelan
@@ -78,6 +79,9 @@ yandex:
 
 mailru:
   name: Mail.ru
+
+proton:
+  name: Proton Mail
 
 workmail:
   noInbox: folder Kotak Masuk tidak ada

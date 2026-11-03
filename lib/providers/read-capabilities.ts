@@ -6,6 +6,7 @@ export function canMarkMessagesRead(provider: ProviderId): boolean {
     provider === 'gmail' ||
     provider === 'yandex' ||
     provider === 'workmail' ||
-    provider === 'mailru'
+    provider === 'mailru' ||
+    provider === 'proton'
   );
 }

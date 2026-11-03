@@ -66,6 +66,9 @@ const ICONS: Record<string, string> = {
   // Mail.ru mark: the blue "@" of its 2024 favicon
   mailru:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#07f" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg>',
+  // Proton Mail mark, redrawn from the web client's favicon
+  proton:
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><path fill="url(#pm-a)" d="M0 12V3.513l5.057 4.178a1.5 1.5 0 0 0 1.896.013L8.375 6.56l.594-.47v-.005L13 2.86V14H2a2 2 0 0 1-2-2Z"/><path fill="url(#pm-b)" d="M0 3.513 5.057 7.69a1.5 1.5 0 0 0 1.896.013L8.375 6.56l.594-.47v-.006l-.344.276a1 1 0 0 1-1.25 0L1.22 1.434A.75.75 0 0 0 0 2.02v1.493Z"/><path fill="url(#pm-c)" d="M16 12V2.02a.75.75 0 0 0-1.219-.586L13 2.86V14h1a2 2 0 0 0 2-2Z"/><defs><linearGradient id="pm-b" x1="5.3" x2="2.048" y1="8.097" y2="-5.711" gradientUnits="userSpaceOnUse"><stop stop-color="#E3D9FF"/><stop offset="1" stop-color="#7341FF"/></linearGradient><linearGradient id="pm-c" x1="20.528" x2="7.258" y1="22.254" y2="-2.929" gradientUnits="userSpaceOnUse"><stop offset=".271" stop-color="#E3D9FF"/><stop offset="1" stop-color="#7341FF"/></linearGradient><radialGradient id="pm-a" cx="0" cy="0" r="1" gradientTransform="matrix(15.1603 0 0 16.1982 12.943 4.224)" gradientUnits="userSpaceOnUse"><stop offset=".556" stop-color="#6D4AFF"/><stop offset=".994" stop-color="#AA8EFF"/></radialGradient></defs></svg>',
   // Amazon WorkMail mark, redrawn from the web client's favicon: a green envelope frame + flap
   workmail:
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g fill="#69a543"><path fill-rule="evenodd" d="M0 0h32v32H0zM3 3v26h26V3z"/><path d="M3.5 3h25L16 15.5z"/></g></svg>',

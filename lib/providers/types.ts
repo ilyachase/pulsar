@@ -1,4 +1,4 @@
-export type ProviderId = 'gmail' | 'yandex' | 'mailru' | 'workmail';
+export type ProviderId = 'gmail' | 'yandex' | 'mailru' | 'proton' | 'workmail';
 
 export interface Message {
   id: string;

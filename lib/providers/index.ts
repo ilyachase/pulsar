@@ -2,6 +2,7 @@ import { type Disconnected, disconnectedProviders, withoutDisconnected } from '.
 import { workmailUrlItem } from '../settings-store';
 import { fetchGmailAccounts } from './gmail';
 import { fetchMailruAccounts } from './mailru';
+import { fetchProtonAccounts } from './proton';
 import type { Account, ProviderId } from './types';
 import { fetchWorkmailAccounts } from './workmail';
 import { fetchYandexAccounts } from './yandex';
@@ -13,6 +14,7 @@ const providers: Record<ProviderId, () => Promise<Account[]>> = {
   gmail: fetchGmailAccounts,
   yandex: fetchYandexAccounts,
   mailru: fetchMailruAccounts,
+  proton: fetchProtonAccounts,
   workmail: async () => fetchWorkmailAccounts(await workmailUrlItem.getValue()),
 };
 
